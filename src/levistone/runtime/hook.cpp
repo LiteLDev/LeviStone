@@ -26,7 +26,7 @@
 
 namespace endstone::hook {
 
-namespace {
+namespace details {
 
 struct HookData {
     void *original{};
@@ -52,13 +52,17 @@ struct HookData {
     }
 };
 
-std::unordered_map<entt::hashed_string::hash_type, HookData> gOriginalsByName;
-}  // namespace
-
-void *get_original(entt::hashed_string::hash_type name)
+using OriginalMap = std::unordered_map<entt::hashed_string::hash_type, HookData>;
+static OriginalMap &originals()
 {
-    const auto it = gOriginalsByName.find(name);
-    if (it == gOriginalsByName.end()) {
+    static OriginalMap originals;
+    return originals;
+}
+
+void *&get_original(entt::hashed_string::hash_type name)
+{
+    const auto it = details::originals().find(name);
+    if (it == details::originals().end()) {
         throw std::runtime_error("original function not found");
     }
     return it->second.original;
@@ -73,15 +77,16 @@ const std::unordered_map<std::string, void *> &get_targets()
     auto *executable_base = detail::get_executable_base();
     detail::foreach_symbol([executable_base](const auto &key, auto offset) {
         auto *target = static_cast<char *>(executable_base) + offset;
-        targets.emplace(key.data(), target);
+        targets.emplace(key, target);
     });
     return targets;
+}
 }
 
 void install()
 {
-    const auto &detours = get_detours();
-    const auto &targets = get_targets();
+    const auto &detours = details::get_detours();
+    const auto &targets = details::get_targets();
 
     ll::thread::GlobalThreadPauser g;
 
@@ -91,7 +96,7 @@ void install()
         }
         if (auto it = targets.find(name); it != targets.end()) {
             void *target = it->second;
-            gOriginalsByName.try_emplace(entt::hashed_string{name.c_str()}).first->second.init(name, target, detour);
+            details::originals().try_emplace(entt::hashed_string{name.c_str()}).first->second.init(name, target, detour);
         }
         else {
             throw std::runtime_error(fmt::format("Unable to find target function for detour: {}.", name));
@@ -102,6 +107,6 @@ void install()
 void uninstall()
 {
     ll::thread::GlobalThreadPauser g;
-    gOriginalsByName.clear();
+    details::originals().clear();
 }
 }  // namespace endstone::hook
