@@ -1,0 +1,3 @@
+[submodule "endstone"]
+	path = endstone
+	url = https://github.com/EndstoneMC/endstone
