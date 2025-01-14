@@ -2,7 +2,6 @@ add_rules("mode.debug", "mode.release")
 
 add_repositories("LiteLDev-repo https://github.com/LiteLDev/xmake-repo.git")
 
-add_requires("sentry-native")
 add_requires("libbase64")
 add_requires("boost 1.85.0")
 add_requires("moodycamelconqueue")
@@ -20,7 +19,7 @@ local python_libname = "python312"
 -- Define common packages to avoid repetition
 local common_packages = {
     "libbase64", "boost", "moodycamelconqueue",
-    "cpptrace", "date", "toml++", "sentry-native", "levilamina"
+    "cpptrace", "date", "toml++", "levilamina"
 }
 
 local get_version = function (oss)
@@ -111,10 +110,12 @@ target("endstone_core")
     add_files("endstone/src/bedrock/**.cpp")
     add_files("endstone/src/endstone/core/**.cpp")
     add_files("src/levistone/core/**.cpp")
+    remove_files("endstone/src/endstone/core/command/defaults/version_command.cpp")
     remove_files("endstone/src/endstone/core/devtools/**.cpp")
     remove_files("endstone/src/endstone/core/spdlog/**.cpp")
+    remove_files("endstone/src/endstone/core/crash_handler.cpp")
     remove_files("endstone/src/endstone/core/logger_factory.cpp")
-    remove_files("endstone/src/endstone/core/command/defaults/version_command.cpp")
+    remove_files("endstone/src/endstone/core/signal_handler.cpp")
     add_deps("endstone")
     add_packages(common_packages)
     add_packages("python", "pybind11", {links = python_libname})
