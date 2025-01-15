@@ -7,13 +7,13 @@ add_requires("boost 1.85.0")
 add_requires("moodycamelconqueue")
 add_requires("cpptrace 0.7.1")
 add_requires("date 3.0.3")
-add_requires("pybind11 2.13.6")
 add_requires("toml++ v3.4.0")
 
 add_requires("levilamina 42b75be796e8481394a8dd380c2500f76287919f")
 add_requires("levibuildscript")
 
-add_requires("python 3.12.3")
+add_requires("python 3.12.8")
+add_requires("pybind11 2.13.6")
 local python_libname = "python312"
 
 -- Define common packages to avoid repetition
