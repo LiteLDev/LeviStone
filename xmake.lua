@@ -13,7 +13,7 @@ add_requires("toml++ v3.4.0")
 add_requires("levilamina 42b75be796e8481394a8dd380c2500f76287919f")
 add_requires("levibuildscript")
 
-add_requires("python 3.12.x")
+add_requires("python 3.12.3")
 local python_libname = "python312"
 
 -- Define common packages to avoid repetition
