@@ -1,0 +1,58 @@
+name: Wheel
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  build_wheels:
+    name: Build Wheel (${{ matrix.python-tag }}-${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        python-tag: ["cp39", "cp310", "cp311", "cp312", "cp313"]
+        include:
+          - os: windows-latest
+            platform: win_amd64
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+          fetch-depth: 0
+
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/AppData/Local/.xmake
+          key: xmake-${{ hashFiles('xmake.lua') }}
+          restore-keys: |
+            xmake-
+
+      - run: |
+          xmake repo -u
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.22.0
+        env:
+          CIBW_BUILD_FRONTEND: build
+          CIBW_BUILD: ${{ matrix.python-tag }}-${{ matrix.platform }}
+          CIBW_BUILD_VERBOSITY: 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: endstone-wheels-${{ matrix.python-tag }}-${{ matrix.platform }}
+          path: ./wheelhouse/*.whl

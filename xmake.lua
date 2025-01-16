@@ -12,9 +12,17 @@ add_requires("toml++ v3.4.0")
 add_requires("levilamina 42b75be796e8481394a8dd380c2500f76287919f")
 add_requires("levibuildscript")
 
-add_requires("python 3.12.8")
+python_version = "3.12.x"
+if os.getenv("PYTHON_VERSION") then
+    python_version = os.getenv("PYTHON_VERSION")
+end
+local get_python_libname = function (version)
+    local major, minor = version:match("(%d+)%.(%d+)")
+    return "python" .. major .. minor
+end
+local python_libname = get_python_libname(python_version)
+add_requires("python " .. python_version)
 add_requires("pybind11 2.13.6")
-local python_libname = "python312"
 
 -- Define common packages to avoid repetition
 local common_packages = {
@@ -66,7 +74,7 @@ target("endstone")
     end)
 
 target("endstone_python")
-    add_rules("python.library")
+    add_rules("python.library", {soabi = true})
     add_files("src/levistone/memory_operators.cpp")
     add_files("endstone/src/endstone/python/**.cpp")
     add_deps("endstone")
@@ -126,7 +134,10 @@ target("endstone_core")
 target("endstone_runtime")
     set_kind("shared")
     on_load(function (target)
-        target:add("rules", "@levibuildscript/modpacker", {modName = "EndstoneRuntime", modVersion = get_version(os)})
+        target:add("rules", "@levibuildscript/modpacker", {
+            modName = "EndstoneRuntime", 
+            modVersion = get_version(os)
+        })
     end)
     add_files("src/levistone/memory_operators.cpp")
     add_files("endstone/src/endstone/runtime/windows.cpp")

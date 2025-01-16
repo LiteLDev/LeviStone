@@ -68,7 +68,7 @@ bool EndstoneRuntime::load()
         // https://docs.python.org/3/c-api/init_config.html#init-isolated-conf
         PyConfig config;
         PyConfig_InitIsolatedConfig(&config);
-        PyConfig_SetString(&config, &config.pythonpath_env, (getSelf().getModDir() / "Lib").c_str());
+        PyConfig_SetString(&config, &config.pythonpath_env, (getSelf().getModDir()).c_str());
         config.isolated = 0;
         config.use_environment = 1;
         config.install_signal_handlers = 0;
