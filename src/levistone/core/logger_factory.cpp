@@ -131,7 +131,12 @@ public:
     }
     void log(Level level, std::string_view message) const override
     {
-        logger_->log(transformLevel(level), message);
+        if (isEnabledFor(level)) {
+            auto lines = message | std::ranges::views::split('\n');
+            for (const auto line : lines) {
+                logger_->log(transformLevel(level), std::string_view(line.begin(), line.end()));
+            }
+        }
     }
 
 private:
