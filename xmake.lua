@@ -74,7 +74,7 @@ target("endstone")
     end)
 
 target("endstone_python")
-    add_rules("python.library", {soabi = true})
+    add_rules("python.library")
     add_files("src/levistone/memory_operators.cpp")
     add_files("endstone/src/endstone/python/**.cpp")
     add_deps("endstone")
