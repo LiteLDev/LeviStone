@@ -54,7 +54,6 @@ if not os.path.exists(data_path):
     build_native()
 
 setup(
-    name="levistone",
     packages=find_packages(library_path) + ["."],
     package_dir={"": library_path, ".": native_path},
     package_data={"": ["*"]},
