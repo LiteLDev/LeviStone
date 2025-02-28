@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-add_repositories("LiteLDev-repo https://github.com/LiteLDev/xmake-repo.git")
+add_repositories("levimc-repo https://github.com/LiteLDev/xmake-repo.git")
 
 add_requires("libbase64")
 add_requires("boost 1.85.0")
@@ -9,7 +9,7 @@ add_requires("cpptrace 0.7.1")
 add_requires("date 3.0.3")
 add_requires("toml++ v3.4.0")
 
-add_requires("levilamina 42b75be796e8481394a8dd380c2500f76287919f")
+add_requires("levilamina 2e818330ddc776bffa06c2ccea9f6f6497b8978d")
 add_requires("levibuildscript")
 
 python_version = "3.12.x"
