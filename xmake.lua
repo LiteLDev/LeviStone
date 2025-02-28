@@ -9,7 +9,7 @@ add_requires("cpptrace 0.7.1")
 add_requires("date 3.0.3")
 add_requires("toml++ v3.4.0")
 
-add_requires("levilamina 2e818330ddc776bffa06c2ccea9f6f6497b8978d")
+add_requires("levilamina 1.1.0")
 add_requires("levibuildscript")
 
 python_version = "3.12.x"
