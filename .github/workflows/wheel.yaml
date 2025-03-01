@@ -54,5 +54,23 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: endstone-wheels-${{ matrix.python-tag }}-${{ matrix.platform }}
+          name: levistone-wheels-${{ matrix.python-tag }}-${{ matrix.platform }}
           path: ./wheelhouse/*.whl
+
+  pypi-publish:
+    name: Upload Wheels to PyPI
+    needs: [build_wheels]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: levistone-wheels-*
+          path: dist
+          merge-multiple: true
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
