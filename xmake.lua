@@ -31,9 +31,7 @@ local common_packages = {
 }
 
 local get_version = function (oss)
-        oss.cd("endstone")
         local tags = oss.iorun("git describe --tags --long")
-        oss.cd("..")
         local tag, num_commits, commit_hash = tags:match("v?(%S+)-(%d+)-g([a-f0-9]+)")
         if tonumber(num_commits) > 0 then
             tag = tag:match("%d+.%d+.%d+")
