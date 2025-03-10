@@ -36,7 +36,7 @@ local get_version = function (oss)
         oss.cd("..")
         local tag, num_commits, commit_hash = tags:match("v?(%S+)-(%d+)-g([a-f0-9]+)")
         if tonumber(num_commits) > 0 then
-            tag = tag:match("(%S+)%.%d+")
+            tag = tag:match("%d+.%d+.%d+")
             tag = tag.."-dev"..num_commits
         end
         return tag
