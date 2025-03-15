@@ -34,6 +34,12 @@ jobs:
         with:
           xmake-version: latest
 
+      - uses: matbour/setup-sentry-cli@v1
+        with:
+          token: ${{ SECRETS.SENTRY_TOKEN }}
+          organization: ${{ SECRETS.SENTRY_ORG }}
+          project: ${{ SECRETS.SENTRY_PROJECT }}
+
       - uses: actions/cache@v4
         with:
           path: |
@@ -51,6 +57,9 @@ jobs:
           CIBW_BUILD_FRONTEND: build
           CIBW_BUILD: ${{ matrix.python-tag }}-${{ matrix.platform }}
           CIBW_BUILD_VERBOSITY: 1
+
+      - run: |
+          sentry-cli debug-files upload --include-sources bin/
 
       - uses: actions/upload-artifact@v4
         with:
