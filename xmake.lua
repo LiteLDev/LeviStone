@@ -8,6 +8,7 @@ add_requires("moodycamelconqueue")
 add_requires("cpptrace 0.7.1")
 add_requires("date 3.0.3")
 add_requires("toml++ v3.4.0")
+add_requires("microsoft-detours b2bf32a657be1114b173ad28d2d65463ca4c466f")
 
 add_requires("levilamina 1.2.0-rc.1")
 add_requires("levibuildscript")
@@ -27,7 +28,7 @@ add_requires("pybind11 2.13.6")
 -- Define common packages to avoid repetition
 local common_packages = {
     "libbase64", "boost", "moodycamelconqueue",
-    "cpptrace", "date", "toml++", "levilamina"
+    "cpptrace", "date", "toml++", "levilamina", "microsoft-detours"
 }
 
 local get_version = function (oss)
