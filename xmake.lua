@@ -11,7 +11,7 @@ add_requires("toml++ v3.4.0")
 add_requires("microsoft-detours ea6c4ae7f3f1b1772b8a7cda4199230b932f5a50")
 add_requires("funchook v1.1.3")
 
-add_requires("levilamina a22a1e5ac62a1fdf9470e9711660d1cac36a0c2f")
+add_requires("levilamina 1.4.0")
 add_requires("levibuildscript")
 
 python_version = "3.12.x"
@@ -59,7 +59,7 @@ target("endstone")
         local symbols = toml.parse(io.readfile( "endstone/src/bedrock/symbol_generator/symbols.toml"))[target:plat()]
         local count = 0
         for _ in pairs(symbols) do count = count + 1 end
-        local file = assert(io.open("$(buildir)/generated/bedrock_symbols.generated.h", "w"), "Failed to open symbol file")
+        local file = assert(io.open("$(builddir)/generated/bedrock_symbols.generated.h", "w"), "Failed to open symbol file")
         file:write("#pragma once\n\n")
         file:write("// clang-format off\n")
         file:write("#include <array>\n")
@@ -76,7 +76,7 @@ target("endstone")
     end)
 
 target("endstone_python")
-    add_rules("python.library")
+    add_rules("python.module")
     add_files("src/levistone/memory_operators.cpp")
     add_files("endstone/src/endstone/python/**.cpp")
     add_deps("endstone")
@@ -116,7 +116,7 @@ target("endstone_python")
 target("endstone_core")
     set_kind("static")
     set_languages("c++20")
-    add_includedirs("endstone/src", "$(buildir)/generated", {public = true})
+    add_includedirs("endstone/src", "$(builddir)/generated", {public = true})
     add_files("endstone/src/bedrock/**.cpp")
     add_files("endstone/src/endstone/core/**.cpp")
     add_files("src/levistone/core/**.cpp")
