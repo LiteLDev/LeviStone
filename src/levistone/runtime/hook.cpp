@@ -52,20 +52,21 @@ struct HookData {
     }
 };
 
-using OriginalMap = std::unordered_map<entt::hashed_string::hash_type, HookData>;
+using OriginalMap = std::unordered_map<void *, void *>;
+
 static OriginalMap &originals()
 {
     static OriginalMap originals;
     return originals;
 }
 
-void *&get_original(entt::hashed_string::hash_type name)
+void *&get_original(void *target)
 {
-    const auto it = details::originals().find(name);
-    if (it == details::originals().end()) {
+    const auto it = originals().find(target);
+    if (it == originals().end()) {
         throw std::runtime_error("original function not found");
     }
-    return it->second.original;
+    return it->second;
 }
 
 const std::unordered_map<std::string, void *> &get_targets()
@@ -96,7 +97,8 @@ void install()
         }
         if (auto it = targets.find(name); it != targets.end()) {
             void *target = it->second;
-            details::originals().try_emplace(entt::hashed_string{name.c_str()}).first->second.init(name, target, detour);
+            void *original = target;
+            details::originals().try_emplace(target, original);
         }
         else {
             throw std::runtime_error(fmt::format("Unable to find target function for detour: {}.", name));
