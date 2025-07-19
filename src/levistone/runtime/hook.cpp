@@ -52,7 +52,7 @@ struct HookData {
     }
 };
 
-using OriginalMap = std::unordered_map<void *, void *>;
+using OriginalMap = std::unordered_map<void *, HookData>;
 
 static OriginalMap &originals()
 {
@@ -66,7 +66,7 @@ void *&get_original(void *target)
     if (it == originals().end()) {
         throw std::runtime_error("original function not found");
     }
-    return it->second;
+    return it->second.original;
 }
 
 const std::unordered_map<std::string, void *> &get_targets()
@@ -98,7 +98,7 @@ void install()
         if (auto it = targets.find(name); it != targets.end()) {
             void *target = it->second;
             void *original = target;
-            details::originals().try_emplace(target, original);
+            details::originals().try_emplace(target).first->second.init(name, target, detour);
         }
         else {
             throw std::runtime_error(fmt::format("Unable to find target function for detour: {}.", name));
