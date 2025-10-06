@@ -14,12 +14,13 @@
 
 #include <memory>
 
+#include <ll/api/chrono/GameChrono.h>
+#include <ll/api/coro/CoroTask.h>
 #include <ll/api/mod/NativeMod.h>
 #include <ll/api/mod/RegisterHelper.h>
-#include <ll/api/utils/StringUtils.h>
+#include <ll/api/thread/ServerThreadExecutor.h>
 #include <pybind11/embed.h>
 
-#include "endstone/core/devtools/devtools.h"
 #include "endstone/runtime/hook.h"
 
 namespace endstone::hook {
@@ -59,6 +60,13 @@ EndstoneRuntime &EndstoneRuntime::getInstance()
 
 bool EndstoneRuntime::load()
 {
+    std::filesystem::path configPath = "endstone.toml";
+    std::filesystem::path defaultConfigPath = getSelf().getModDir() / "endstone" / "config" / "endstone.toml";
+    if (!std::filesystem::exists(configPath)) {
+        if (std::filesystem::exists(defaultConfigPath)) {
+            std::filesystem::copy_file(defaultConfigPath, configPath);
+        }
+    }
     auto &logger = getSelf().getLogger();
     try {
         logger.info("Initialising...");
@@ -68,7 +76,7 @@ bool EndstoneRuntime::load()
         // https://docs.python.org/3/c-api/init_config.html#init-isolated-conf
         PyConfig config;
         PyConfig_InitIsolatedConfig(&config);
-        PyConfig_SetString(&config, &config.pythonpath_env, (getSelf().getModDir()).c_str());
+        PyConfig_SetString(&config, &config.pythonpath_env, getSelf().getModDir().c_str());
         config.isolated = 0;
         config.use_environment = 1;
         config.install_signal_handlers = 0;
@@ -109,10 +117,12 @@ bool EndstoneRuntime::enable()
 
 bool EndstoneRuntime::disable()
 {
-
     if (enabled) {
         getSelf().getLogger().debug("Disabling...");
-        disable_endstone_server();
+        ll::coro::keepThis([]() -> ll::coro::CoroTask<> {
+            disable_endstone_server();
+            co_return;
+        }).syncLaunch(ll::thread::ServerThreadExecutor::getDefault());
         enabled = false;
     }
     return true;

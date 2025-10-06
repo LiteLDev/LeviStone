@@ -22,7 +22,7 @@ class TagProvider(bdist_wheel):
             raise Exception("unsupported system")
         if platform.architecture() != ("64bit", "WindowsPE"):
             raise Exception("unsupported architecture")
-        return (python_version, python_version, "win_amd64")
+        return python_version, python_version, "win_amd64"
 
 
 def build_native():
@@ -48,7 +48,6 @@ def build_native():
     for e in ext:
         for f in glob(f"bin/EndstoneRuntime/*{e}"):
             shutil.copy(f, native_path)
-
 
 if not os.path.exists(data_path):
     build_native()

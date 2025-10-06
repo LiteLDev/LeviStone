@@ -1,0 +1,1 @@
+recursive-include bin/EndstoneRuntime/Lib/endstone/config *.toml

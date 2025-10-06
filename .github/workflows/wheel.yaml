@@ -22,6 +22,24 @@ jobs:
         include:
           - os: windows-latest
             platform: win_amd64
+            python-tag: cp39
+            python-version: "3.9"
+          - os: windows-latest
+            platform: win_amd64
+            python-tag: cp310
+            python-version: "3.10"
+          - os: windows-latest
+            platform: win_amd64
+            python-tag: cp311
+            python-version: "3.11"
+          - os: windows-latest
+            platform: win_amd64
+            python-tag: cp312
+            python-version: "3.12"
+          - os: windows-latest
+            platform: win_amd64
+            python-tag: cp313
+            python-version: "3.13"
 
     steps:
       - name: Checkout Code
@@ -51,8 +69,12 @@ jobs:
       - run: |
           xmake repo -u
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.0.1
+        uses: pypa/cibuildwheel@v3.2.0
         env:
           CIBW_BUILD_FRONTEND: build
           CIBW_BUILD: ${{ matrix.python-tag }}-${{ matrix.platform }}

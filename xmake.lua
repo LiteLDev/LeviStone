@@ -11,7 +11,7 @@ add_requires("toml++ v3.4.0")
 add_requires("microsoft-detours ea6c4ae7f3f1b1772b8a7cda4199230b932f5a50")
 add_requires("funchook v1.1.3")
 
-add_requires("levilamina 1.4.0")
+add_requires("levilamina 1.4.4")
 add_requires("levibuildscript")
 
 python_version = "3.12.x"
