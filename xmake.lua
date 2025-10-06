@@ -11,7 +11,7 @@ add_requires("toml++ v3.4.0")
 add_requires("microsoft-detours ea6c4ae7f3f1b1772b8a7cda4199230b932f5a50")
 add_requires("funchook v1.1.3")
 
-add_requires("levilamina 1.4.4")
+add_requires("levilamina 1.5.2")
 add_requires("levibuildscript")
 
 python_version = "3.12.x"
@@ -24,7 +24,7 @@ local get_python_libname = function (version)
 end
 local python_libname = get_python_libname(python_version)
 add_requires("python " .. python_version)
-add_requires("pybind11 2.13.6")
+add_requires("pybind11 3.0.1")
 
 -- Define common packages to avoid repetition
 local common_packages = {
