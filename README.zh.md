@@ -25,3 +25,7 @@ pip install levistone==0.10.5 --target plugins/EndstoneRuntime
 ### 为什么有些 Endstone 版本不受支持？
 
 LeviLamina 只支持每个 Minecraft 协议版本中的一个版本，而 Endstone 支持多个版本。
+
+### 如何知道我应该安装哪个版本？
+
+通过查看 [LeviLamina支持的版本](https://lamina.levimc.org/zh/versions/) 和 [Endstone的发布页面](https://github.com/EndstoneMC/endstone/releases)。
