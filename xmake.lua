@@ -55,6 +55,10 @@ target("endstone")
     add_includedirs("endstone/include", {public = true})
     add_headerfiles("endstone/include/(**.h)")
     on_load(function (target)
+        os.cd("endstone")
+        os.runv("git", {"restore", "."})
+        os.cd("..")
+        os.runv("git", {"apply", "patches/feat__add_support_for_BDS_v1_21_113.patch"})
         local toml = import("scripts.toml")
         local symbols = toml.parse(io.readfile( "endstone/src/bedrock/symbol_generator/symbols.toml"))[target:plat()]
         local count = 0
