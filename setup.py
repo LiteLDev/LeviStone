@@ -60,7 +60,7 @@ setup(
     use_scm_version={
         "root": "endstone",
         "relative_to": __file__,
-        "version_scheme": "guess-next-dev",
+        "version_scheme": "only-version",
         "local_scheme": "no-local-version",
     },
     cmdclass={"bdist_wheel": TagProvider},
