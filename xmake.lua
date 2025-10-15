@@ -57,8 +57,10 @@ target("endstone")
     on_load(function (target)
         os.cd("$(projectdir)/endstone")
         os.runv("git", {"restore", "."})
+        local patch = os.iorunv("git", {"format-patch", "-1", "8a65e4d97485c075dacb63dbef9e089a2beaca26"})
+        patch = string.gsub(patch, "\n", "")
+        os.runv("git", {"apply", "-R", patch})
         os.cd("$(projectdir)")
-        os.runv("git", {"apply", "patches/feat__add_support_for_BDS_v1_21_113.patch"})
         local toml = import("scripts.toml")
         local symbols = toml.parse(io.readfile( "endstone/src/bedrock/symbol_generator/symbols.toml"))[target:plat()]
         local count = 0
