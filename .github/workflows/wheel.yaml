@@ -74,7 +74,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.2.0
+        uses: pypa/cibuildwheel@v3.2.1
         env:
           CIBW_BUILD_FRONTEND: build
           CIBW_BUILD: ${{ matrix.python-tag }}-${{ matrix.platform }}
