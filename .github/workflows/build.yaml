@@ -37,7 +37,7 @@ jobs:
       - run: |
           xmake -v -y
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: LeviStone-windows-x64-${{ github.sha }}
           path: |
