@@ -11,8 +11,14 @@ add_requires("toml++ v3.4.0")
 add_requires("microsoft-detours ea6c4ae7f3f1b1772b8a7cda4199230b932f5a50")
 add_requires("funchook v1.1.3")
 
-add_requires("levilamina 1.6.0")
+add_requires("levilamina 1.7.0")
 add_requires("levibuildscript")
+
+option("patch")
+    set_default(false)
+    set_showmenu(true)
+    set_description("When endstone's Minecraft version is different from LeviLamina, enable this")
+option_end()
 
 python_version = "3.12.x"
 if os.getenv("PYTHON_VERSION") then
@@ -55,12 +61,14 @@ target("endstone")
     add_includedirs("endstone/include", {public = true})
     add_headerfiles("endstone/include/(**.h)")
     on_load(function (target)
-        os.cd("$(projectdir)/endstone")
-        os.runv("git", {"restore", "."})
-        local patch = os.iorunv("git", {"format-patch", "-1", "8a65e4d97485c075dacb63dbef9e089a2beaca26"})
-        patch = string.gsub(patch, "\n", "")
-        os.runv("git", {"apply", "-R", patch})
-        os.cd("$(projectdir)")
+        if has_config("patch") then
+            os.cd("$(projectdir)/endstone")
+            os.runv("git", {"restore", "."})
+            local patch = os.iorunv("git", {"format-patch", "-1", "8a65e4d97485c075dacb63dbef9e089a2beaca26"})
+            patch = string.gsub(patch, "\n", "")
+            os.runv("git", {"apply", "-R", patch})
+            os.cd("$(projectdir)")
+        end
         local toml = import("scripts.toml")
         local symbols = toml.parse(io.readfile( "endstone/src/bedrock/symbol_generator/symbols.toml"))[target:plat()]
         local count = 0
