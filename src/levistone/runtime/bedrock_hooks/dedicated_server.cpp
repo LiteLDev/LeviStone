@@ -1,0 +1,52 @@
+// Copyright (c) 2024, The Endstone Project. (https://endstone.dev) All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "bedrock/server/dedicated_server.h"
+
+#include <iostream>
+
+#include <pybind11/embed.h>
+
+#include "endstone/core/logger_factory.h"
+#include "endstone/runtime/hook.h"
+#include "levistone/runtime/endstone_runtime.h"
+
+namespace py = pybind11;
+
+DedicatedServer::StartResult DedicatedServer::start(const std::string &session_id,
+                                                    const Bedrock::ActivationArguments &args)
+{
+    // Initialise an isolated Python environment to avoid installing signal handlers
+    // https://docs.python.org/3/c-api/init_config.html#init-isolated-conf
+    PyConfig config;
+    PyConfig_InitIsolatedConfig(&config);
+    PyConfig_SetString(&config, &config.pythonpath_env,
+                       endstone::core::EndstoneRuntime::getInstance().getSelf().getModDir().c_str());
+    config.isolated = 0;
+    config.use_environment = 1;
+    config.install_signal_handlers = 0;
+    py::initialize_interpreter(&config);
+    py::module_::import("threading");  // https://github.com/pybind/pybind11/issues/2197
+    py::module_::import("numpy");      // https://github.com/numpy/numpy/issues/24833
+
+    // Release the GIL
+    py::gil_scoped_release release{};
+
+    // Start the dedicated server (call origin)
+    auto result = ENDSTONE_HOOK_CALL_ORIGINAL(&DedicatedServer::start, this, session_id, args);
+
+    // Clean up
+    entt::locator<endstone::core::EndstoneServer>::reset();
+    return result;
+}

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "levistone/runtime/endstone_runtime.h"
+
 #include <memory>
 
 #include <ll/api/chrono/GameChrono.h>
@@ -33,25 +35,6 @@ void unload_endstone_server();
 void disable_endstone_server();
 void enable_endstone_server();
 
-class EndstoneRuntime {
-
-public:
-    static EndstoneRuntime &getInstance();
-    EndstoneRuntime() : mSelf(*ll::mod::NativeMod::current()) {}
-    [[nodiscard]] ll::mod::NativeMod &getSelf() const
-    {
-        return mSelf;
-    }
-    bool load();
-    bool enable();
-    bool disable();
-    // bool unload();
-
-private:
-    ll::mod::NativeMod &mSelf;
-    bool enabled{};
-};
-
 EndstoneRuntime &EndstoneRuntime::getInstance()
 {
     static EndstoneRuntime instance;
@@ -60,6 +43,7 @@ EndstoneRuntime &EndstoneRuntime::getInstance()
 
 bool EndstoneRuntime::load()
 {
+    // Create endstone.toml
     std::filesystem::path configPath = "endstone.toml";
     std::filesystem::path defaultConfigPath = getSelf().getModDir() / "endstone" / "config" / "endstone.toml";
     if (!std::filesystem::exists(configPath)) {
@@ -70,30 +54,8 @@ bool EndstoneRuntime::load()
     auto &logger = getSelf().getLogger();
     try {
         logger.info("Initialising...");
-        namespace py = pybind11;
-
-        // Initialise an isolated Python environment to avoid installing signal handlers
-        // https://docs.python.org/3/c-api/init_config.html#init-isolated-conf
-        PyConfig config;
-        PyConfig_InitIsolatedConfig(&config);
-        PyConfig_SetString(&config, &config.pythonpath_env, getSelf().getModDir().c_str());
-        config.isolated = 0;
-        config.use_environment = 1;
-        config.install_signal_handlers = 0;
-        py::initialize_interpreter(&config);
-        py::module_::import("threading");  // https://github.com/pybind/pybind11/issues/2197
-        py::module_::import("numpy");      // https://github.com/numpy/numpy/issues/24833
-        py::gil_scoped_release release{};
-        release.disarm();
-
         // Install hooks
         endstone::hook::install();
-
-#ifdef ENDSTONE_WITH_DEVTOOLS
-        // Create devtools window
-        auto thread = std::thread(&endstone::devtools::render);
-        thread.detach();
-#endif
     }
     catch (const std::exception &e) {
         logger.error("An exception occurred while initialising Endstone runtime.");
