@@ -32,7 +32,6 @@ void disable_endstone_server()
 }
 void enable_endstone_server()
 {
-
     auto &server = entt::locator<core::EndstoneServer>::value_or();
     server.reloadData();
     server.loadPlugins();

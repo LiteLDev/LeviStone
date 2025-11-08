@@ -14,19 +14,34 @@
 
 #include "bedrock/server/dedicated_server.h"
 
-#include <iostream>
-
 #include <pybind11/embed.h>
 
 #include "endstone/core/logger_factory.h"
 #include "endstone/runtime/hook.h"
 #include "levistone/runtime/endstone_runtime.h"
 
+#if defined(_WIN32)
+#include <io.h>
+#define DUP    _dup
+#define DUP2   _dup2
+#define CLOSE  _close
+#define FILENO _fileno
+#else
+#include <unistd.h>
+#define DUP    dup
+#define DUP2   dup2
+#define CLOSE  close
+#define FILENO fileno
+#endif
+
 namespace py = pybind11;
 
 DedicatedServer::StartResult DedicatedServer::start(const std::string &session_id,
                                                     const Bedrock::ActivationArguments &args)
 {
+    // Save the current stdin, as it will be altered after the initialisation of python interpreter
+    const auto old_stdin = DUP(FILENO(stdin));
+
     // Initialise an isolated Python environment to avoid installing signal handlers
     // https://docs.python.org/3/c-api/init_config.html#init-isolated-conf
     PyConfig config;
@@ -42,6 +57,11 @@ DedicatedServer::StartResult DedicatedServer::start(const std::string &session_i
 
     // Release the GIL
     py::gil_scoped_release release{};
+
+    // Restore the stdin
+    std::fflush(stdin);
+    DUP2(old_stdin, FILENO(stdin));
+    CLOSE(old_stdin);
 
     // Start the dedicated server (call origin)
     auto result = ENDSTONE_HOOK_CALL_ORIGINAL(&DedicatedServer::start, this, session_id, args);
