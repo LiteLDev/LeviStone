@@ -15,11 +15,8 @@ add_requires("replxx 2021.11.25")
 add_requires("levilamina 1.7.1")
 add_requires("levibuildscript")
 
-option("patch")
-    set_default(false)
-    set_showmenu(true)
-    set_description("When endstone's Minecraft version is different from LeviLamina, enable this")
-option_end()
+-- When endstone's Minecraft version is different from LeviLamina, enable this and edit commit hashes
+local enable_patch = true
 
 python_version = "3.12.x"
 if os.getenv("PYTHON_VERSION") then
@@ -62,12 +59,16 @@ target("endstone")
     add_includedirs("endstone/include", {public = true})
     add_headerfiles("endstone/include/(**.h)")
     on_load(function (target)
-        if has_config("patch") then
+        if enable_patch then
+            function apply_patch(commit)
+                local patch = os.iorunv("git", {"format-patch", "-1", commit})
+                patch = string.gsub(patch, "\n", "")
+                os.runv("git", {"apply", "-R", patch})
+            end
             os.cd("$(projectdir)/endstone")
             os.runv("git", {"restore", "."})
-            local patch = os.iorunv("git", {"format-patch", "-1", "8a65e4d97485c075dacb63dbef9e089a2beaca26"})
-            patch = string.gsub(patch, "\n", "")
-            os.runv("git", {"apply", "-R", patch})
+            apply_patch("0a1eb71141878aee78e41fab4d0cd233dcbc130e")
+            apply_patch("ed0e9f73bb7b3da37cd3e783460ca1e284e4b635")
             os.cd("$(projectdir)")
         end
         local toml = import("scripts.toml")
