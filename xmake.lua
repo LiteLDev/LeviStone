@@ -60,15 +60,9 @@ target("endstone")
     add_headerfiles("endstone/include/(**.h)")
     on_load(function (target)
         if enable_patch then
-            function apply_patch(commit)
-                local patch = os.iorunv("git", {"format-patch", "-1", commit})
-                patch = string.gsub(patch, "\n", "")
-                os.runv("git", {"apply", "-R", patch})
-            end
             os.cd("$(projectdir)/endstone")
             os.runv("git", {"restore", "."})
-            apply_patch("0a1eb71141878aee78e41fab4d0cd233dcbc130e")
-            apply_patch("ed0e9f73bb7b3da37cd3e783460ca1e284e4b635")
+            os.runv("git", {"apply", "../patches/chore__patch_symbols_toml.patch"})
             os.cd("$(projectdir)")
         end
         local toml = import("scripts.toml")
