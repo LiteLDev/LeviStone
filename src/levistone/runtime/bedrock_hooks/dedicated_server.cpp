@@ -51,7 +51,7 @@ DedicatedServer::StartResult DedicatedServer::start(const std::string &session_i
     config.isolated = 0;
     config.use_environment = 1;
     config.install_signal_handlers = 0;
-    py::initialize_interpreter(&config);
+    py::scoped_interpreter interpreter(&config);
     py::module_::import("threading");  // https://github.com/pybind/pybind11/issues/2197
     py::module_::import("numpy");      // https://github.com/numpy/numpy/issues/24833
 
@@ -63,7 +63,6 @@ DedicatedServer::StartResult DedicatedServer::start(const std::string &session_i
     DUP2(old_stdin, FILENO(stdin));
     CLOSE(old_stdin);
 
-    // Start the dedicated server (call origin)
     auto result = ENDSTONE_HOOK_CALL_ORIGINAL(&DedicatedServer::start, this, session_id, args);
 
     // Clean up
