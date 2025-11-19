@@ -15,9 +15,6 @@ add_requires("replxx 2021.11.25")
 add_requires("levilamina 1.7.1")
 add_requires("levibuildscript")
 
--- When endstone's Minecraft version is different from LeviLamina, enable this and edit commit hashes
-local enable_patch = true
-
 python_version = "3.12.x"
 if os.getenv("PYTHON_VERSION") then
     python_version = os.getenv("PYTHON_VERSION")
@@ -59,12 +56,13 @@ target("endstone")
     add_includedirs("endstone/include", {public = true})
     add_headerfiles("endstone/include/(**.h)")
     on_load(function (target)
-        if enable_patch then
-            os.cd("$(projectdir)/endstone")
-            os.runv("git", {"restore", "."})
-            os.runv("git", {"apply", "../patches/chore__patch_symbols_toml.patch"})
-            os.cd("$(projectdir)")
-        end
+        -- Patch symbols.toml and vulnerability fixes
+        os.cd("$(projectdir)/endstone")
+        os.runv("git", {"restore", "."})
+        os.runv("git", {"apply", "../patches/chore__patch_symbols_toml.patch"})
+        os.runv("git", {"apply", "../patches/refactor__patch_vulnerability_fixes.patch"})
+        os.cd("$(projectdir)")
+
         local toml = import("scripts.toml")
         local symbols = toml.parse(io.readfile( "endstone/src/bedrock/symbol_generator/symbols.toml"))[target:plat()]
         local count = 0
