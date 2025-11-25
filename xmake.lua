@@ -13,7 +13,7 @@ add_requires("funchook v1.1.3")
 add_requires("replxx 2021.11.25")
 add_requires("mimalloc v2.1.7")
 
-add_requires("levilamina 1.7.1")
+add_requires("levilamina 1.7.6")
 add_requires("levibuildscript")
 
 python_version = "3.12.x"
@@ -60,7 +60,6 @@ target("endstone")
         -- Patch symbols.toml and vulnerability fixes
         os.cd("$(projectdir)/endstone")
         os.runv("git", {"restore", "."})
-        os.runv("git", {"apply", "../patches/chore__patch_symbols_toml.patch"})
         os.runv("git", {"apply", "../patches/refactor__patch_vulnerability_fixes.patch"})
         os.cd("$(projectdir)")
 
