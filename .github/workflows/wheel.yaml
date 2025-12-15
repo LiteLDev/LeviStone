@@ -83,7 +83,7 @@ jobs:
       - run: |
           sentry-cli debug-files upload --include-sources bin/
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: levistone-wheels-${{ matrix.python-tag }}-${{ matrix.platform }}
           path: ./wheelhouse/*.whl
