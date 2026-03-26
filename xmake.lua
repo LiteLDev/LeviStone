@@ -17,21 +17,12 @@ add_requires("zstr v1.0.7")
 add_requires("levilamina 1.9.8")
 add_requires("levibuildscript")
 
-python_version = "3.12.x"
-if os.getenv("PYTHON_VERSION") then
-    python_version = os.getenv("PYTHON_VERSION")
-end
-local get_python_libname = function (version)
-    local major, minor = version:match("(%d+)%.(%d+)")
-    return "python" .. major .. minor
-end
-local python_libname = get_python_libname(python_version)
-add_requires("python " .. python_version)
 add_requires("pybind11 3.0.1")
 
 -- Define common packages to avoid repetition
 local common_packages = {
-    "aklomp-base64", "boost", "moodycamelconqueue", "cpptrace", "date", "replxx", "zstr", "toml++", "levilamina", "microsoft-detours"
+    "aklomp-base64", "boost", "moodycamelconqueue", "cpptrace", "date",
+    "replxx", "zstr", "toml++", "levilamina", "microsoft-detours", "pybind11"
 }
 
 local get_version = function (oss)
@@ -91,7 +82,6 @@ target("endstone_python")
     add_deps("endstone")
     add_packages(common_packages)
     add_packages("mimalloc")
-    add_packages("python", "pybind11", {links = python_libname})
     set_symbols("debug")
     after_build(function (target)
         local file = assert(io.open("endstone/endstone/_version.py", "w"))
@@ -134,7 +124,6 @@ target("endstone_core")
     remove_files("endstone/src/endstone/core/signal_handler.cpp")
     add_deps("endstone")
     add_packages(common_packages)
-    add_packages("python", "pybind11", {links = python_libname})
     on_load(function (target)
         target:add("defines", "ENDSTONE_VERSION=\""..get_version(os).."\"")
     end)
@@ -156,7 +145,6 @@ target("endstone_runtime")
     remove_files("endstone/src/endstone/runtime/bedrock_hooks/dedicated_server.cpp")
     add_deps("endstone_core")
     add_packages(common_packages)
-    add_packages("python", "pybind11", {links = python_libname})
     add_packages("funchook")
     add_links("dbghelp", "ws2_32","Psapi")
     set_symbols("debug")
