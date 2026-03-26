@@ -24,12 +24,15 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
 ]
 dependencies = [
+    "aiohttp",
+    "asyncio",
     "click",
-    "endstone-bstats==0.1.0",
     "importlib-metadata",
     "importlib-resources",
+    "lazy-loader",
     "numpy",
     "packaging",
+    "pip",
     "pkginfo",
     "psutil",
     "pyyaml",
