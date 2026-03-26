@@ -38,7 +38,7 @@ bool EndstoneRuntime::load()
 {
     // Create endstone.toml
     std::filesystem::path configPath = "endstone.toml";
-    std::filesystem::path defaultConfigPath = getSelf().getModDir() / "endstone" / "config" / "endstone.toml";
+    std::filesystem::path defaultConfigPath = getSelf().getModDir() / "endstone" / "config" / "endstone.default.toml";
     if (!std::filesystem::exists(configPath)) {
         if (std::filesystem::exists(defaultConfigPath)) {
             std::filesystem::copy_file(defaultConfigPath, configPath);
