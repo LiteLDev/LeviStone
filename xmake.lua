@@ -58,10 +58,10 @@ target("endstone")
     add_headerfiles("endstone/include/(**.h)")
     on_load(function (target)
         -- Patch symbols.toml and vulnerability fixes
-        -- os.cd("$(projectdir)/endstone")
-        -- os.runv("git", {"restore", "."})
-        -- os.runv("git", {"apply", "../patches/refactor__patch_vulnerability_fixes.patch"})
-        -- os.cd("$(projectdir)")
+        os.cd("$(projectdir)/endstone")
+        os.runv("git", {"restore", "."})
+        os.runv("git", {"apply", "../patches/Disable_vulnerability_fixes_already_included_in_LeviLamina.patch"})
+        os.cd("$(projectdir)")
 
         local toml = import("scripts.toml")
         local symbols = toml.parse(io.readfile( "endstone/src/bedrock/symbol_generator/symbols.toml"))[target:plat()]
