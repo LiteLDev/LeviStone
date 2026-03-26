@@ -99,7 +99,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          pattern: levistone-
+          pattern: levistone-*
           path: dist
           merge-multiple: true
 
