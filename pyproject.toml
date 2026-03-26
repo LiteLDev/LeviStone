@@ -32,7 +32,6 @@ dependencies = [
     "lazy-loader",
     "numpy",
     "packaging",
-    "pip",
     "pkginfo",
     "psutil",
     "pyyaml",
