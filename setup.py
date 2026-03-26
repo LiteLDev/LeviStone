@@ -10,8 +10,6 @@ from glob import glob
 
 
 data_path = "bin/EndstoneRuntime"
-native_path = data_path + "/Native"
-library_path = data_path + "/Lib"
 
 
 class TagProvider(bdist_wheel):
@@ -43,18 +41,12 @@ def build_native():
         check=True,
     )
 
-    os.makedirs(native_path, exist_ok=True)
-    ext = [".dll", ".pdb", ".json"]
-    for e in ext:
-        for f in glob(f"bin/EndstoneRuntime/*{e}"):
-            shutil.copy(f, native_path)
-
 if not os.path.exists(data_path):
     build_native()
 
 setup(
-    packages=find_packages(library_path) + ["."],
-    package_dir={"": library_path, ".": native_path},
+    packages=find_packages(data_path) + ["."],
+    package_dir={"": data_path},
     package_data={"": ["*"]},
     setup_requires=["setuptools_scm"],
     use_scm_version={

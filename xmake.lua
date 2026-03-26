@@ -84,6 +84,7 @@ target("endstone")
     end)
 
 target("endstone_python")
+    set_basename("_python")
     add_rules("python.module")
     add_files("endstone/src/endstone/python/**.cpp")
     add_files("src/levistone/python/**.cpp")
@@ -114,11 +115,8 @@ target("endstone_python")
             file:print(", '%s')", suffix:sub(2))
         end
         file:close()
-        if not os.isdir("bin/EndstoneRuntime/Lib/endstone/_internal") then
-            os.mkdir("bin/EndstoneRuntime/Lib/endstone/_internal")
-        end
-        os.cp("endstone/endstone", "bin/EndstoneRuntime/Lib")
-        os.cp(target:targetfile(), "bin/EndstoneRuntime/Lib/endstone/_internal")
+        os.cp("endstone/endstone", "bin/EndstoneRuntime/")
+        os.cp(target:targetfile(), "bin/EndstoneRuntime/endstone/")
     end)
 
 target("endstone_core")
