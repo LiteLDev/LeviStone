@@ -2,18 +2,19 @@ add_rules("mode.debug", "mode.release")
 
 add_repositories("levimc-repo https://github.com/LiteLDev/xmake-repo.git")
 
-add_requires("libbase64")
+add_requires("aklomp-base64 0.5.2")
 add_requires("boost 1.86.0")
-add_requires("moodycamelconqueue")
+add_requires("moodycamelconqueue 1.0.4")
 add_requires("cpptrace 1.0.4")
 add_requires("date 3.0.4")
-add_requires("toml++ v3.4.0")
-add_requires("microsoft-detours ea6c4ae7f3f1b1772b8a7cda4199230b932f5a50")
+add_requires("toml++ v3.3.0")
+add_requires("microsoft-detours 9764cebcb1a75940e68fa83d6730ffaf0f669401")
 add_requires("funchook v1.1.3")
 add_requires("replxx 2021.11.25")
 add_requires("mimalloc v2.1.7")
+add_requires("zstr v1.0.7")
 
-add_requires("levilamina 1.7.6")
+add_requires("levilamina 1.9.8")
 add_requires("levibuildscript")
 
 python_version = "3.12.x"
@@ -30,8 +31,7 @@ add_requires("pybind11 3.0.1")
 
 -- Define common packages to avoid repetition
 local common_packages = {
-    "libbase64", "boost", "moodycamelconqueue",
-    "cpptrace", "date", "toml++", "levilamina", "microsoft-detours"
+    "aklomp-base64", "boost", "moodycamelconqueue", "cpptrace", "date", "replxx", "zstr", "toml++", "levilamina", "microsoft-detours"
 }
 
 local get_version = function (oss)
@@ -58,10 +58,10 @@ target("endstone")
     add_headerfiles("endstone/include/(**.h)")
     on_load(function (target)
         -- Patch symbols.toml and vulnerability fixes
-        os.cd("$(projectdir)/endstone")
-        os.runv("git", {"restore", "."})
-        os.runv("git", {"apply", "../patches/refactor__patch_vulnerability_fixes.patch"})
-        os.cd("$(projectdir)")
+        -- os.cd("$(projectdir)/endstone")
+        -- os.runv("git", {"restore", "."})
+        -- os.runv("git", {"apply", "../patches/refactor__patch_vulnerability_fixes.patch"})
+        -- os.cd("$(projectdir)")
 
         local toml = import("scripts.toml")
         local symbols = toml.parse(io.readfile( "endstone/src/bedrock/symbol_generator/symbols.toml"))[target:plat()]
@@ -137,7 +137,6 @@ target("endstone_core")
     add_deps("endstone")
     add_packages(common_packages)
     add_packages("python", "pybind11", {links = python_libname})
-    add_packages("replxx")
     on_load(function (target)
         target:add("defines", "ENDSTONE_VERSION=\""..get_version(os).."\"")
     end)

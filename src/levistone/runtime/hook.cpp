@@ -15,16 +15,14 @@
 #include "endstone/runtime/hook.h"
 
 #include <string>
-#include <system_error>
 #include <unordered_map>
 
-#include <entt/core/hashed_string.hpp>
 #include <ll/api/memory/Hook.h>
 
 #include "bedrock/symbol.h"
-#include "endstone/detail/platform.h"
+#include "endstone/core/platform.h"
 
-namespace endstone::hook {
+namespace endstone::runtime::hook {
 
 namespace details {
 
@@ -75,8 +73,8 @@ const std::unordered_map<std::string, void *> &get_targets()
     if (!targets.empty()) {
         return targets;
     }
-    auto *executable_base = detail::get_executable_base();
-    detail::foreach_symbol([executable_base](const auto &key, auto offset) {
+    auto *executable_base = get_executable_base();
+    foreach_symbol([executable_base](const auto &key, auto offset) {
         auto *target = static_cast<char *>(executable_base) + offset;
         targets.emplace(key, target);
     });

@@ -14,20 +14,13 @@
 
 #include "levistone/runtime/endstone_runtime.h"
 
-#include <memory>
-
 #include <ll/api/chrono/GameChrono.h>
 #include <ll/api/coro/CoroTask.h>
 #include <ll/api/mod/NativeMod.h>
 #include <ll/api/mod/RegisterHelper.h>
 #include <ll/api/thread/ServerThreadExecutor.h>
-#include <pybind11/embed.h>
 
 #include "endstone/runtime/hook.h"
-
-namespace endstone::hook {
-void uninstall();
-}  // namespace endstone::hook
 
 namespace endstone::core {
 
@@ -55,7 +48,7 @@ bool EndstoneRuntime::load()
     try {
         logger.info("Initialising...");
         // Install hooks
-        endstone::hook::install();
+        runtime::hook::install();
     }
     catch (const std::exception &e) {
         logger.error("An exception occurred while initialising Endstone runtime.");
