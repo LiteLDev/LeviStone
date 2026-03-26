@@ -145,9 +145,13 @@ private:
 
 Logger &LoggerFactory::getLogger(const std::string &name)
 {
-    if (name == "Server" || name == "EndstoneRuntime") {
+    if (name == "Endstone") {
         static LogAdapter self{ll::mod::NativeMod::current()->getLogger().shared_from_this()};
         return self;
+    }
+    if (name.empty()) {
+        static LogAdapter serverLogger{ll::io::LoggerRegistry::getInstance().getOrCreate("Server")};
+        return serverLogger;
     }
     static std::mutex mutex;
     static std::unordered_map<std::string, LogAdapter> loggers;
