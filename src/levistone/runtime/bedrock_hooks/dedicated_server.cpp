@@ -14,25 +14,14 @@
 
 #include "bedrock/server/dedicated_server.h"
 
+#include <iostream>
+
 #include <pybind11/embed.h>
 
 #include "endstone/core/logger_factory.h"
 #include "endstone/runtime/hook.h"
+#include "endstone/runtime/runtime.h"
 #include "levistone/runtime/endstone_runtime.h"
-
-#if defined(_WIN32)
-#include <io.h>
-#define DUP    _dup
-#define DUP2   _dup2
-#define CLOSE  _close
-#define FILENO _fileno
-#else
-#include <unistd.h>
-#define DUP    dup
-#define DUP2   dup2
-#define CLOSE  close
-#define FILENO fileno
-#endif
 
 namespace py = pybind11;
 
@@ -40,7 +29,7 @@ DedicatedServer::StartResult DedicatedServer::start(const std::string &session_i
                                                     const Bedrock::ActivationArguments &args)
 {
     // Save the current stdin, as it will be altered after the initialisation of python interpreter
-    const auto old_stdin = DUP(FILENO(stdin));
+    endstone::runtime::stdin_save();
 
     // Initialise an isolated Python environment to avoid installing signal handlers
     // https://docs.python.org/3/c-api/init_config.html#init-isolated-conf
@@ -51,21 +40,22 @@ DedicatedServer::StartResult DedicatedServer::start(const std::string &session_i
     config.isolated = 0;
     config.use_environment = 1;
     config.install_signal_handlers = 0;
-    py::scoped_interpreter interpreter(&config);
+    py::initialize_interpreter(&config);
     py::module_::import("threading");  // https://github.com/pybind/pybind11/issues/2197
     py::module_::import("numpy");      // https://github.com/numpy/numpy/issues/24833
 
     // Release the GIL
     py::gil_scoped_release release{};
 
-    // Restore the stdin
-    std::fflush(stdin);
-    DUP2(old_stdin, FILENO(stdin));
-    CLOSE(old_stdin);
+    // Close stdin so that the ConsoleInputReader thread exits as soon as it begins
+    endstone::runtime::stdin_close();
 
+    // Start the dedicated server (call origin)
+    entt::locator<DedicatedServer *>::emplace(this);
     auto result = ENDSTONE_HOOK_CALL_ORIGINAL(&DedicatedServer::start, this, session_id, args);
 
     // Clean up
     entt::locator<endstone::core::EndstoneServer>::reset();
+    entt::locator<DedicatedServer>::reset();
     return result;
 }

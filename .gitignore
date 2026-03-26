@@ -559,3 +559,4 @@ fabric.properties
 /.vscode/
 /bin/
 
+dist/*
