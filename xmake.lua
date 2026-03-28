@@ -150,12 +150,6 @@ target("endstone_core")
 
 target("endstone_runtime")
     set_kind("shared")
-    on_load(function (target)
-        target:add("rules", "@levibuildscript/modpacker", {
-            modName = "EndstoneRuntime", 
-            modVersion = get_version(os)
-        })
-    end)
     add_includedirs("src/")
     add_ldflags("/DEBUG /INCREMENTAL:NO /OPT:REF /OPT:ICF /EXPORT:DllMain,@1,NONAME")
     add_cxflags("/utf-8 /O2 /DNDEBUG /Gy")
@@ -170,3 +164,9 @@ target("endstone_runtime")
     add_packages("funchook")
     add_links("dbghelp", "ws2_32","Psapi")
     set_symbols("debug")
+    on_load(function (target)
+        target:add("rules", "@levibuildscript/modpacker", {
+            modName = "EndstoneRuntime",
+            modVersion = get_version(os)
+        })
+    end)
