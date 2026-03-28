@@ -90,7 +90,7 @@ void install()
     ll::thread::GlobalThreadPauser g;
 
     for (const auto &[name, detour] : detours) {
-        if (name.starts_with("ll_")) {
+        if (name.starts_with("ll_") || name == "EntryPoint") { // Workaround to fix LeviStone on Wine
             continue;
         }
         if (auto it = targets.find(name); it != targets.end()) {
