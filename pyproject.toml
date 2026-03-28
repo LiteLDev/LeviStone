@@ -62,6 +62,7 @@ where = ["bin/EndstoneRuntime"]
 write_to = "endstone/endstone/_version.py"
 version_scheme = "guess-next-dev"
 local_scheme = "no-local-version"
+scm.git.describe_command = "git describe --tags --long --match *[0-9]*"
 
 [tool.ruff]
 line-length = 120
