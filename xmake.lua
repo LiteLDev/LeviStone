@@ -25,17 +25,18 @@ add_requires("mimalloc v2.1.7")
 add_requires("levilamina 1.9.8")
 add_requires("levibuildscript")
 
-local get_version = function (oss)
-        oss.cd("endstone")
-        local tags = oss.iorun("git describe --tags --long")
-        oss.cd("..")
-        local tag, num_commits, commit_hash = tags:match("v?(%S+)-(%d+)-g([a-f0-9]+)")
-        if tonumber(num_commits) > 0 then
-            tag = tag:match("%d+.%d+.%d+")
-            tag = tag.."-dev"..num_commits
+local get_version = function(os)
+    local tags = os.iorun("git describe --tags --long")
+    local tag, num_commits, commit_hash = tags:match("v?(%S+)-(%d+)-g([a-f0-9]+)")
+    if tonumber(num_commits) > 0 then
+        local major, minor, patch = tag:match("(%d+)%.(%d+)%.(%d+)")
+        if major and minor and patch then
+            tag = string.format("%s.%s.%d", major, minor, tonumber(patch) + 1)
         end
-        return tag
+        tag = tag..".dev"..num_commits
     end
+    return tag
+end
 
 set_project("endstone")
 set_languages("c++20")
@@ -103,27 +104,6 @@ target("endstone_python")
     add_packages("mimalloc", "pybind11", "microsoft-detours")
     set_symbols("debug")
     after_build(function (target)
-        local file = assert(io.open("endstone/endstone/_version.py", "w"))
-        file:write("TYPE_CHECKING = False\n")
-        file:write("if TYPE_CHECKING:\n")
-        file:write("    from typing import Tuple, Union\n")
-        file:write("    VERSION_TUPLE = Tuple[Union[int, str], ...]\n")
-        file:write("else:\n")
-        file:write("    VERSION_TUPLE = object\n\n")
-        file:write("version: str\n")
-        file:write("__version__: str\n")
-        file:write("__version_tuple__: VERSION_TUPLE\n")
-        file:write("version_tuple: VERSION_TUPLE\n\n")
-        local version = get_version(os)
-        file:print("__version__ = version = '%s'", version)
-        local major, minor, patch, suffix = version:match("(%d+)%.(%d+)%.(%d+)(.*)")
-        file:printf("__version_tuple__ = version_tuple = (%d, %d, %d", major, minor, patch)
-        if suffix == nil then
-            file:print(")")
-        else
-            file:print(", '%s')", suffix:sub(2))
-        end
-        file:close()
         os.cp("endstone/endstone", "bin/EndstoneRuntime/")
         os.cp(target:targetfile(), "bin/EndstoneRuntime/endstone/")
     end)

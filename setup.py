@@ -1,16 +1,11 @@
-import re
 import os
 import sys
-import shutil
 import platform
 import subprocess
-from setuptools import setup, find_packages
+from setuptools import setup
 from setuptools.command.bdist_wheel import bdist_wheel
-from glob import glob
 
-
-data_path = "bin/EndstoneRuntime"
-
+bin_path = "bin/EndstoneRuntime"
 
 class TagProvider(bdist_wheel):
     def get_tag(self):
@@ -41,19 +36,9 @@ def build_native():
         check=True,
     )
 
-if not os.path.exists(data_path):
+if not os.path.exists(bin_path):
     build_native()
 
 setup(
-    packages=find_packages(data_path) + ["."],
-    package_dir={"": data_path},
-    package_data={"": ["*"]},
-    setup_requires=["setuptools_scm"],
-    use_scm_version={
-        "root": "endstone",
-        "relative_to": __file__,
-        "version_scheme": "only-version",
-        "local_scheme": "no-local-version",
-    },
     cmdclass={"bdist_wheel": TagProvider},
 )
