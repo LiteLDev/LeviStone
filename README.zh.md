@@ -16,6 +16,8 @@ pip install levistone==0.10.5 --target plugins/EndstoneRuntime
 ```
 你可以在 [PyPI](https://pypi.org/project/levistone/#history) 上找到所有版本。
 
+你正在使用Docker?试试 [docker-levistone-server](https://github.com/LiteLDev/docker-levistone-server)
+
 ## 常见问题
 
 ### 我可以运行 Endstone 的原生插件吗？
