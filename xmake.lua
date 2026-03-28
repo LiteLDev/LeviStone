@@ -41,6 +41,37 @@ set_project("endstone")
 set_languages("c++20")
 set_runtimes("MD")
 
+rule("patch_vulnerability_fixes")
+    on_load(function (target)
+        -- Patch symbols.toml and vulnerability fixes
+        os.cd("$(projectdir)/endstone")
+        os.runv("git", {"restore", "."})
+        os.runv("git", {"apply", "../patches/Disable_vulnerability_fixes_already_included_in_LeviLamina.patch"})
+        os.cd("$(projectdir)")
+    end)
+
+rule("generate_symbols")
+    on_load(function (target)
+        local toml = import("scripts.toml")
+        local symbols = toml.parse(io.readfile( "endstone/src/bedrock/symbol_generator/symbols.toml"))[target:plat()]
+        local count = 0
+        for _ in pairs(symbols) do count = count + 1 end
+        local file = assert(io.open("$(builddir)/generated/bedrock_symbols.generated.h", "w"), "Failed to open symbol file")
+        file:write("#pragma once\n\n")
+        file:write("// clang-format off\n")
+        file:write("#include <array>\n")
+        file:write("#include <string_view>\n\n")
+        file:write("static constexpr std::array<std::pair<std::string_view, std::size_t>, ")
+        file:write(count)
+        file:write("> symbols = {{\n")
+        for k, v in pairs(symbols) do
+            file:print("    { \"%s\", %d },", k, v)
+        end
+        file:write("}};\n")
+        file:write("// clang-format on\n")
+        file:close()
+    end)
+
 target("endstone")
     set_kind("headeronly")
     set_languages("c++20")
@@ -48,6 +79,7 @@ target("endstone")
     add_packages("fmt", "expected-lite", {interface = true})
 
 target("bedrock")
+    add_rules("patch_vulnerability_fixes", "generate_symbols")
     set_kind("object")
     set_languages("c++20")
     add_includedirs("endstone/src", "$(builddir)/generated", {public = true})
@@ -58,32 +90,6 @@ target("bedrock")
     add_defines("ENTT_SPARSE_PAGE=2048", "ENTT_PACKED_PAGE=128", "ENTT_NO_MIXIN", {public = true})
     add_deps("endstone", {public = true})
     add_packages("aklomp-base64", "boost", "fmt", "entt", "glm", "magic_enum", "gsl", "expected-lite", {public = true})
-    on_load(function (target)
-            -- Patch symbols.toml and vulnerability fixes
-            os.cd("$(projectdir)/endstone")
-            os.runv("git", {"restore", "."})
-            os.runv("git", {"apply", "../patches/Disable_vulnerability_fixes_already_included_in_LeviLamina.patch"})
-            os.cd("$(projectdir)")
-
-            local toml = import("scripts.toml")
-            local symbols = toml.parse(io.readfile( "endstone/src/bedrock/symbol_generator/symbols.toml"))[target:plat()]
-            local count = 0
-            for _ in pairs(symbols) do count = count + 1 end
-            local file = assert(io.open("$(builddir)/generated/bedrock_symbols.generated.h", "w"), "Failed to open symbol file")
-            file:write("#pragma once\n\n")
-            file:write("// clang-format off\n")
-            file:write("#include <array>\n")
-            file:write("#include <string_view>\n\n")
-            file:write("static constexpr std::array<std::pair<std::string_view, std::size_t>, ")
-            file:write(count)
-            file:write("> symbols = {{\n")
-            for k, v in pairs(symbols) do
-                file:print("    { \"%s\", %d },", k, v)
-            end
-            file:write("}};\n")
-            file:write("// clang-format on\n")
-            file:close()
-        end)
 
 target("endstone_python")
     set_basename("_python")
