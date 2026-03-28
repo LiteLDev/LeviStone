@@ -57,9 +57,9 @@ where = ["bin/EndstoneRuntime"]
 
 [tool.setuptools.data-files]
 "" = [
-    "bin/EndstoneRuntime/endstone_runtime.dll",
-    "bin/EndstoneRuntime/endstone_runtime.pdb",
-    "bin/EndstoneRuntime/manifest.json",
+    "bin/EndstoneRuntime/*.dll",
+    "bin/EndstoneRuntime/*.pdb",
+    "bin/EndstoneRuntime/*.json",
 ]
 
 [tool.setuptools.package-data]
