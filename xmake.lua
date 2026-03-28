@@ -89,7 +89,7 @@ target("bedrock")
     add_ldflags("/DEBUG /INCREMENTAL:NO /OPT:REF /OPT:ICF")
     add_cxflags("/O2 /DNDEBUG /Gy")
     add_defines("ENTT_SPARSE_PAGE=2048", "ENTT_PACKED_PAGE=128", "ENTT_NO_MIXIN", {public = true})
-    add_deps("endstone", {public = true})
+    add_deps("endstone")
     add_packages("aklomp-base64", "boost", "fmt", "entt", "glm", "magic_enum", "gsl", "expected-lite", {public = true})
 
 target("endstone_python")
