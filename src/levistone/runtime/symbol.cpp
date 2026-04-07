@@ -18,7 +18,7 @@ std::unordered_map<std::string_view, std::string_view> const &get_vars()
     return vars;
 }
 
-void *resolve_symbol(std::string_view symbol, bool disable_error_output)
+void *resolve_symbol(std::string_view symbol)
 {
     if (symbol.starts_with('?') && !symbol.starts_with("??_")) {
         using namespace demangler::ms_demangle;
@@ -47,7 +47,7 @@ void *resolve_symbol(std::string_view symbol, bool disable_error_output)
                 std::string fakeFuncNode = funcNode.toString();
                 size_t offset = symbol.size() - funcNode.pos.size();
                 fakeSymbol.replace(offset, funcNodeSize, fakeFuncNode);
-                return ll::memory::SymbolView{fakeSymbol}.resolve(disable_error_output);
+                return ll::memory::SymbolView{fakeSymbol}.resolve();
             }
         }
     }
@@ -57,7 +57,7 @@ void *resolve_symbol(std::string_view symbol, bool disable_error_output)
             return reinterpret_cast<void *(*)()>(ll::memory::SymbolView{it->second}.resolve())();
         }
     }
-    return ll::memory::SymbolView{symbol}.resolve(disable_error_output);
+    return ll::memory::SymbolView{symbol}.resolve();
 }
 
 }  // namespace endstone::runtime
