@@ -14,12 +14,16 @@
 
 #include "endstone/runtime/hook.h"
 
+#include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 
+#include <fmt/format.h>
 #include <ll/api/memory/Hook.h>
+#include <ll/api/memory/Symbol.h>
+#include <ll/api/thread/GlobalThreadPauser.h>
 
-#include "bedrock/symbol.h"
 #include "endstone/core/platform.h"
 
 namespace endstone::runtime::hook {
@@ -50,7 +54,7 @@ struct HookData {
     }
 };
 
-using OriginalMap = std::unordered_map<void *, HookData>;
+using OriginalMap = std::unordered_map<std::string_view, HookData>;
 
 static OriginalMap &originals()
 {
@@ -58,49 +62,46 @@ static OriginalMap &originals()
     return originals;
 }
 
-void *&get_original(void *target)
+void *&get_original(std::string_view symbol)
 {
-    const auto it = originals().find(target);
-    if (it == originals().end()) {
-        throw std::runtime_error("original function not found");
-    }
-    return it->second.original;
+    return originals()[symbol].original;
 }
 
-const std::unordered_map<std::string, void *> &get_targets()
+std::unordered_map<std::string, void *> &get_targets()
 {
     static std::unordered_map<std::string, void *> targets;
-    if (!targets.empty()) {
-        return targets;
-    }
-    auto *executable_base = get_executable_base();
-    foreach_symbol([executable_base](const auto &key, auto offset) {
-        auto *target = static_cast<char *>(executable_base) + offset;
-        targets.emplace(key, target);
-    });
     return targets;
 }
+
+const std::error_category &error_category()
+{
+    return std::system_category();
 }
+
+}  // namespace details
 
 void install()
 {
     const auto &detours = details::get_detours();
-    const auto &targets = details::get_targets();
+    auto &target_map = details::get_targets();
 
     ll::thread::GlobalThreadPauser g;
 
     for (const auto &[name, detour] : detours) {
-        if (name.starts_with("ll_") || name == "EntryPoint") { // Workaround to fix LeviStone on Wine
+        if (name.starts_with("ll_") || name == "EntryPoint" ||  // Workaround to fix LeviStone on Wine
+            name.starts_with("?executeWorldInteraction")        // lambda
+        ) {
             continue;
         }
-        if (auto it = targets.find(name); it != targets.end()) {
-            void *target = it->second;
-            void *original = target;
-            details::originals().try_emplace(target).first->second.init(name, target, detour);
+        void *target{};
+        if (auto it = target_map.find(name); it != target_map.end()) {
+            target = it->second;
         }
         else {
-            throw std::runtime_error(fmt::format("Unable to find target function for detour: {}.", name));
+            target = resolve_symbol(name);
+            target_map.emplace(name, target);
         }
+        details::originals().try_emplace(name).first->second.init(name, target, detour);
     }
 }
 
@@ -109,4 +110,4 @@ void uninstall()
     ll::thread::GlobalThreadPauser g;
     details::originals().clear();
 }
-}  // namespace endstone::hook
+}  // namespace endstone::runtime::hook

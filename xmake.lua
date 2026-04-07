@@ -3,7 +3,7 @@ add_rules("mode.debug", "mode.release")
 add_repositories("levimc-repo https://github.com/LiteLDev/xmake-repo.git")
 
 add_requires("aklomp-base64 0.5.2")
-add_requires("boost 1.86.0")
+add_requires("boost 1.84.0")
 add_requires("moodycamelconqueue 1.0.4")
 add_requires("cpptrace 1.0.4")
 add_requires("date 3.0.4")
@@ -17,12 +17,12 @@ add_requires("pybind11 3.0.1")
 add_requires("replxx 2021.11.25")
 add_requires("toml++ v3.3.0")
 add_requires("zstr v1.0.7")
+add_requires("demangler")
 
 add_requires("microsoft-detours 9764cebcb1a75940e68fa83d6730ffaf0f669401")
-add_requires("funchook v1.1.3")
 add_requires("mimalloc v2.1.7")
 
-add_requires("levilamina 1.9.8")
+add_requires("levilamina 26.10.0")
 add_requires("levibuildscript")
 
 local get_version = function(os)
@@ -33,7 +33,7 @@ local get_version = function(os)
         if major and minor and patch then
             tag = string.format("%s.%s.%d", major, minor, tonumber(patch) + 1)
         end
-        tag = tag..".dev"..num_commits
+        tag = tag.."-dev"..num_commits
     end
     return tag
 end
@@ -41,15 +41,6 @@ end
 set_project("endstone")
 set_languages("c++20")
 set_runtimes("MD")
-
-rule("patch_vulnerability_fixes")
-    on_load(function (target)
-        -- Patch symbols.toml and vulnerability fixes
-        os.cd("$(projectdir)/endstone")
-        os.runv("git", {"restore", "."})
-        os.runv("git", {"apply", "../patches/Disable_vulnerability_fixes_already_included_in_LeviLamina.patch"})
-        os.cd("$(projectdir)")
-    end)
 
 rule("generate_symbols")
     on_load(function (target)
@@ -80,10 +71,10 @@ target("endstone")
     add_packages("fmt", "expected-lite", {interface = true})
 
 target("bedrock")
-    add_rules("patch_vulnerability_fixes", "generate_symbols")
+    add_rules("generate_symbols")
     set_kind("object")
     set_languages("c++20")
-    add_includedirs("endstone/src", "$(builddir)/generated", {public = true})
+    add_includedirs("src", "endstone/src", "$(builddir)/generated", {public = true})
     add_files("endstone/src/bedrock/**.cpp")
     remove_files("endstone/src/bedrock/symbol_generator/**.cpp")
     add_ldflags("/DEBUG /INCREMENTAL:NO /OPT:REF /OPT:ICF")
@@ -136,12 +127,15 @@ target("endstone_runtime")
     add_defines("_CRT_SECURE_NO_WARNINGS")
     add_files("src/levistone/memory_operators.cpp")
     add_files("endstone/src/endstone/runtime/windows.cpp")
-    add_files("endstone/src/endstone/runtime/vtable_hook.cpp")
     add_files("endstone/src/endstone/runtime/bedrock_hooks/**.cpp")
     add_files("src/levistone/runtime/**.cpp")
+    remove_files("endstone/src/endstone/runtime/vtable_hook.cpp")
     remove_files("endstone/src/endstone/runtime/bedrock_hooks/dedicated_server.cpp")
+    remove_files("endstone/src/endstone/runtime/bedrock_hooks/server_network_handler.cpp")
+    remove_files("endstone/src/endstone/runtime/bedrock_hooks/item.cpp")
+    remove_files("endstone/src/endstone/runtime/bedrock_hooks/certificate.cpp")
     add_deps("endstone_core")
-    add_packages("funchook")
+    add_packages("demangler")
     add_links("dbghelp", "ws2_32","Psapi")
     set_symbols("debug")
     on_load(function (target)
