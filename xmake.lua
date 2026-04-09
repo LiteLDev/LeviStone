@@ -22,7 +22,7 @@ add_requires("demangler")
 add_requires("microsoft-detours 9764cebcb1a75940e68fa83d6730ffaf0f669401")
 add_requires("mimalloc v2.1.7")
 
-add_requires("levilamina 26.10.0")
+add_requires("levilamina 26.10.*")
 add_requires("levibuildscript")
 
 local get_version = function(os)
@@ -42,28 +42,6 @@ set_project("endstone")
 set_languages("c++20")
 set_runtimes("MD")
 
-rule("generate_symbols")
-    on_load(function (target)
-        local toml = import("scripts.toml")
-        local symbols = toml.parse(io.readfile( "endstone/src/bedrock/symbol_generator/symbols.toml"))[target:plat()]
-        local count = 0
-        for _ in pairs(symbols) do count = count + 1 end
-        local file = assert(io.open("$(builddir)/generated/bedrock_symbols.generated.h", "w"), "Failed to open symbol file")
-        file:write("#pragma once\n\n")
-        file:write("// clang-format off\n")
-        file:write("#include <array>\n")
-        file:write("#include <string_view>\n\n")
-        file:write("static constexpr std::array<std::pair<std::string_view, std::size_t>, ")
-        file:write(count)
-        file:write("> symbols = {{\n")
-        for k, v in pairs(symbols) do
-            file:print("    { \"%s\", %d },", k, v)
-        end
-        file:write("}};\n")
-        file:write("// clang-format on\n")
-        file:close()
-    end)
-
 target("endstone")
     set_kind("headeronly")
     set_languages("c++20")
@@ -71,10 +49,9 @@ target("endstone")
     add_packages("fmt", "expected-lite", {interface = true})
 
 target("bedrock")
-    add_rules("generate_symbols")
     set_kind("object")
     set_languages("c++20")
-    add_includedirs("src", "endstone/src", "$(builddir)/generated", {public = true})
+    add_includedirs("src", "endstone/src", {public = true})
     add_files("endstone/src/bedrock/**.cpp")
     remove_files("endstone/src/bedrock/symbol_generator/**.cpp")
     add_ldflags("/DEBUG /INCREMENTAL:NO /OPT:REF /OPT:ICF")
@@ -121,7 +98,7 @@ target("endstone_core")
 
 target("endstone_runtime")
     set_kind("shared")
-    add_includedirs("src/")
+    add_includedirs("src")
     add_ldflags("/DEBUG /INCREMENTAL:NO /OPT:REF /OPT:ICF /EXPORT:DllMain,@1,NONAME")
     add_cxflags("/utf-8 /O2 /DNDEBUG /Gy")
     add_defines("_CRT_SECURE_NO_WARNINGS")
