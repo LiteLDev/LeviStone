@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "endstone/runtime/hook.h"
+#include "hook.h"
 
 #include <stdexcept>
 #include <string>

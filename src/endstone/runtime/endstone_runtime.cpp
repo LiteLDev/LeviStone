@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "levistone/runtime/endstone_runtime.h"
+#include "endstone/runtime/endstone_runtime.h"
 
 #include <ll/api/chrono/GameChrono.h>
 #include <ll/api/coro/CoroTask.h>
@@ -20,7 +20,7 @@
 #include <ll/api/mod/RegisterHelper.h>
 #include <ll/api/thread/ServerThreadExecutor.h>
 
-#include "endstone/runtime/hook.h"
+#include "hook.h"
 
 namespace endstone::core {
 
