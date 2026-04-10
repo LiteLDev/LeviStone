@@ -33,7 +33,7 @@ local get_version = function(os)
         if major and minor and patch then
             tag = string.format("%s.%s.%d", major, minor, tonumber(patch) + 1)
         end
-        tag = tag.."-dev"..num_commits
+        tag = tag..".dev"..num_commits
     end
     return tag
 end
@@ -118,6 +118,5 @@ target("endstone_runtime")
     on_load(function (target)
         target:add("rules", "@levibuildscript/modpacker", {
             modName = "EndstoneRuntime",
-            modVersion = get_version(os)
         })
     end)
