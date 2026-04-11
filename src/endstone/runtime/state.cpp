@@ -16,6 +16,7 @@
 
 #include "endstone/core/server.h"
 #include "endstone/event/server/server_load_event.h"
+#include "endstone/player.h"
 
 namespace endstone::core {
 void unload_endstone_server()
