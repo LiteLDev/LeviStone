@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           submodules: "recursive"
           fetch-depth: 0
@@ -95,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - id: extract-release-notes
         uses: ffurrer2/extract-release-notes@v3
