@@ -2,7 +2,7 @@ add_rules("mode.debug", "mode.release")
 
 add_repositories("levimc-repo https://github.com/LiteLDev/xmake-repo.git")
 
-add_requires("aklomp-base64 0.5.2")
+add_requires("aklomp-base64 0.5.2", {configs = {cxflags = "-clang:-Wno-error"}})
 add_requires("boost 1.84.0")
 add_requires("moodycamelconqueue 1.0.4")
 add_requires("cpptrace 1.0.4")
@@ -22,7 +22,7 @@ add_requires("demangler")
 add_requires("microsoft-detours 9764cebcb1a75940e68fa83d6730ffaf0f669401")
 add_requires("mimalloc v2.1.7")
 
-add_requires("levilamina 26.10.*")
+add_requires("levilamina 26.20.0")
 add_requires("levibuildscript")
 
 local get_version = function(os)
@@ -41,6 +41,7 @@ end
 set_project("endstone")
 set_languages("c++20")
 set_runtimes("MD")
+set_toolchains("clang-cl")
 
 target("endstone")
     set_kind("headeronly")
@@ -112,7 +113,6 @@ target("endstone_runtime")
     remove_files("endstone/src/endstone/runtime/bedrock_hooks/dedicated_server.cpp")
     remove_files("endstone/src/endstone/runtime/bedrock_hooks/server_network_handler.cpp")
     remove_files("endstone/src/endstone/runtime/bedrock_hooks/item.cpp")
-    remove_files("endstone/src/endstone/runtime/bedrock_hooks/certificate.cpp")
     remove_files("endstone/src/endstone/runtime/bedrock_hooks/rak_peer_helper.cpp")
     add_deps("endstone_core")
     add_packages("demangler")

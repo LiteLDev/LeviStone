@@ -75,7 +75,7 @@ public:
     int addEnumValues(const std::string &name, const std::vector<std::string> &values);
     int addSoftEnum(const std::string &name, std::vector<std::string> values);
     ENDSTONE_HOOK void registerCommand(const std::string &name, char const *description, CommandPermissionLevel level,
-                                       CommandFlag flag1, CommandFlag flag2);
+                         CommandFlag flag1, CommandFlag flag2);
     void registerAlias(std::string name, std::string alias);
 
 private:
@@ -181,12 +181,13 @@ public:
         BlockStateValues = 0x100053,
         BlockStateArray = 0x100054,
         BlockStateArrayCont = 0x100055,
-        Command = 0x100056,
-        SlashCommand = 0x100057,
-        CodeBuilderArg = 0x100058,
-        CodeBuilderArgs = 0x100059,
-        CodeBuilderSelectParam = 0x10005a,
-        CodeBuilderSelector = 0x10005b,
+        ClockTimeMarkerName = 0x100056,
+        Command = 0x100057,
+        SlashCommand = 0x100058,
+        CodeBuilderArg = 0x100059,
+        CodeBuilderArgs = 0x10005a,
+        CodeBuilderSelectParam = 0x10005b,
+        CodeBuilderSelector = 0x10005c,
     };
 
     class Symbol {
@@ -194,25 +195,13 @@ public:
         Symbol() = default;
         Symbol(size_t value) : value_(static_cast<int>(value)) {};
         Symbol(HardNonTerminal value) : value_(static_cast<int>(value)) {};
-        Symbol(const Symbol &other)
-        {
-            value_ = other.value_;
-        }
+        Symbol(const Symbol &other) { value_ = other.value_; }
 
-        bool operator==(const Symbol &other) const
-        {
-            return value_ == other.value_;
-        }
+        bool operator==(const Symbol &other) const { return value_ == other.value_; }
 
-        [[nodiscard]] int value() const
-        {
-            return value_;
-        }
+        [[nodiscard]] int value() const { return value_; }
 
-        [[nodiscard]] std::size_t toIndex() const
-        {
-            return value_ & 0xE00FFFFF;
-        }
+        [[nodiscard]] std::size_t toIndex() const { return value_ & 0xE00FFFFF; }
 
         [[nodiscard]] bool isTerminal() const;
         [[nodiscard]] bool isEnum() const;
@@ -223,17 +212,11 @@ public:
         [[nodiscard]] bool isEnumValue() const;
         [[nodiscard]] bool isChainedSubcommandValue() const;
         [[nodiscard]] bool isSoftEnum() const;
-        static Symbol fromEnumIndex(size_t index)
-        {
-            return {index | EnumBit | NonTerminalBit};
-        }
+        static Symbol fromEnumIndex(size_t index) { return {index | EnumBit | NonTerminalBit}; }
         static Symbol fromOptionalIndex(size_t index);
         static Symbol fromFactorizationIndex(size_t index);
         static Symbol fromPostfixIndex(size_t index);
-        static Symbol fromEnumValueIndex(size_t index)
-        {
-            return {index | EnumValueBit};
-        }
+        static Symbol fromEnumValueIndex(size_t index) { return {index | EnumValueBit}; }
         static Symbol fromSoftEnumIndex(size_t index);
         static Symbol fromChainedSubcommandIndex(size_t index);
         static Symbol fromChainedSubcommandValueIndex(size_t index);
@@ -301,11 +284,19 @@ public:
     struct Factorization;
     using ParseFunction = bool (CommandRegistry::*)(void *, const ParseToken &, const CommandOrigin &, int,
                                                     std::string &, std::vector<std::string> &) const;
+    struct ParamParseRule {
+        ParseFunction parse;
+        Symbol symbol;
+    };
+    template<typename T>
+    struct ParseRuleFor {
+        static const ParamParseRule instance;
+    };
     struct Enum {
         std::string name;
         Bedrock::typeid_t<CommandRegistry> type;
         ParseFunction parse;
-        std::vector<std::pair<std::uint64_t, std::uint64_t>> values;
+        std::vector<std::pair<std::uint32_t, std::uint32_t>> values;
     };
     struct ChainedSubcommand;
     struct SoftEnum {
@@ -353,6 +344,7 @@ public:
     friend class endstone::core::EndstoneCommandMap;
     friend class endstone::core::EndstonePlayer;
     friend class endstone::core::MinecraftCommandPermissions;
+
     [[nodiscard]] std::string describe(const Signature &signature, const Overload &overload) const
     {
         return describe(signature, signature.name, overload, 0, nullptr, nullptr);
@@ -407,9 +399,9 @@ private:
     std::vector<Factorization> factorizations_;                                                  // +296
     std::vector<std::string> postfixes_;                                                         // +320
     std::map<std::string, std::uint32_t> enum_lookup_;                                           // +344
-    std::map<std::string, std::uint64_t> enum_value_lookup_;                                     // +360
+    std::map<std::string, std::uint32_t> enum_value_lookup_;                                     // +360
     std::map<std::string, std::uint32_t> chained_subcommand_lookup_;                             // +376
-    std::map<std::string, std::uint64_t> chained_subcommand_value_lookup_;                       // +392
+    std::map<std::string, std::uint32_t> chained_subcommand_value_lookup_;                       // +392
     std::vector<Symbol> command_symbols_;                                                        // +408
     std::map<std::string, Signature> signatures_;                                                // +432
     std::map<Bedrock::typeid_t<CommandRegistry>, std::int32_t> type_lookup_;                     // +448
@@ -437,33 +429,35 @@ enum class CommandParameterOption : std::uint8_t {
 
 class CommandParameterData {
     using ParseFunction = CommandRegistry::ParseFunction;
+    using ParamParseRule = CommandRegistry::ParamParseRule;
     using CustomStorageGetFn = CommandRegistry::CustomStorageGetFn;
     using CustomStorageIsSetFn = CommandRegistry::CustomStorageIsSetFn;
 
 public:
-    CommandParameterData(Bedrock::typeid_t<CommandRegistry> type_index, ParseFunction parse, char const *name,
-                         CommandParameterDataType param_type, char const *enum_name_or_postfix,
+    CommandParameterData(Bedrock::typeid_t<CommandRegistry> type_index, const ParamParseRule *parse_rule,
+                         char const *name, CommandParameterDataType param_type, char const *enum_name_or_postfix,
                          char const *chained_subcommand, int offset, bool is_optional, int set_offset)
-        : type_index(type_index), parse(parse), name(name), enum_name_or_postfix(enum_name_or_postfix),
+        : type_index(type_index), parse_rule(parse_rule), name(name), enum_name_or_postfix(enum_name_or_postfix),
           chained_subcommand(chained_subcommand), param_type(param_type), offset(offset), set_offset(set_offset),
           is_optional(is_optional)
     {
     }
-    CommandParameterData(Bedrock::typeid_t<CommandRegistry>, ParseFunction, const char *, int, bool, CustomStorageGetFn,
-                         CustomStorageIsSetFn);
+    CommandParameterData(Bedrock::typeid_t<CommandRegistry>, const ParamParseRule *, const char *, int, bool,
+                         CustomStorageGetFn, CustomStorageIsSetFn);
 
     Bedrock::typeid_t<CommandRegistry> type_index;                 // +0
-    ParseFunction parse;                                           // +8
-    std::string name;                                              // +16
-    const char *enum_name_or_postfix;                              // +48
-    int enum_or_postfix_symbol{-1};                                // +56
-    const char *chained_subcommand;                                // +64
-    int chained_subcommand_symbol{-1};                             // +72
-    CommandParameterDataType param_type;                           // +76
-    int offset;                                                    // +80
-    int set_offset;                                                // +84
-    bool is_optional;                                              // +88
-    CommandParameterOption options{CommandParameterOption::None};  // +89
+    const ParamParseRule *parse_rule;                              // +8
+    ParseFunction parse_override{nullptr};                         // +16
+    std::string name;                                              // +24
+    const char *enum_name_or_postfix;                              // +56
+    int enum_or_postfix_symbol{-1};                                // +64
+    const char *chained_subcommand;                                // +72
+    int chained_subcommand_symbol{-1};                             // +80
+    CommandParameterDataType param_type;                           // +84
+    int offset;                                                    // +88
+    int set_offset;                                                // +92
+    bool is_optional;                                              // +96
+    CommandParameterOption options{CommandParameterOption::None};  // +97
     CustomStorageGetFn value_get_fn{nullptr};
     CustomStorageIsSetFn value_is_set_fn{nullptr};
 };

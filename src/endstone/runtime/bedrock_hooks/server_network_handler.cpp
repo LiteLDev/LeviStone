@@ -17,7 +17,7 @@
 void ServerNetworkHandler::disconnectClientWithMessage(const NetworkIdentifier &id, const SubClientId sub_id,
                                                        const Connection::DisconnectFailReason reason,
                                                        const std::string &message,
-                                                       std::optional<std::string> filtered_message, bool skip_message)
+                                                       std::optional<std::string> filtered_message)
 {
     const auto &server = endstone::core::EndstoneServer::getInstance();
     auto disconnect_message = message;
@@ -39,7 +39,7 @@ void ServerNetworkHandler::disconnectClientWithMessage(const NetworkIdentifier &
     }
 
     ENDSTONE_HOOK_CALL_ORIGINAL(&ServerNetworkHandler::disconnectClientWithMessage, this, id, sub_id, reason,
-                                disconnect_message, std::move(filtered_message), skip_message);
+                                disconnect_message, std::move(filtered_message));
 }
 
 bool ServerNetworkHandler::tryToLoadPlayer(ServerPlayer &server_player, const ConnectionRequest &connection_request,
@@ -49,7 +49,7 @@ bool ServerNetworkHandler::tryToLoadPlayer(ServerPlayer &server_player, const Co
                                                         connection_request, player_info);
     const auto &server = endstone::core::EndstoneServer::getInstance();
     auto &endstone_player = server_player.getEndstoneActor<endstone::core::EndstonePlayer>();
-    endstone_player.initFromConnectionRequest(&connection_request);
+    endstone_player.initFromConnectionRequest(connection_request);
 
     endstone::PlayerLoginEvent e{endstone_player};
     server.getPluginManager().callEvent(e);
@@ -86,7 +86,7 @@ void ServerNetworkHandler::disconnect(NetworkIdentifier const &network_id, SubCl
         player->addOrRemoveComponent<endstone::core::InternalDisconnectFlagComponent>(true);
     }
     disconnectClientWithMessage(network_id, sub_client_id, Connection::DisconnectFailReason::NoReason, reason,
-                                std::nullopt, false);
+                                std::nullopt);
 }
 
 std::optional<PlayerAuthenticationInfo> ServerNetworkHandler::_validateLoginPacket(const NetworkIdentifier &source,
@@ -111,7 +111,7 @@ std::optional<PlayerAuthenticationInfo> ServerNetworkHandler::_validateLoginPack
 
     const auto &info = *auth_info;
     const auto &name =
-        info.xuid.empty() ? packet.payload.connection_request->getClientThirdPartyName() : info.xbox_live_name;
+        info.xuid.empty() ? packet.payload.connection_request->getThirdPartyName() : info.xbox_live_name;
     const auto uuid = endstone::core::EndstoneUUID::fromMinecraft(info.authenticated_uuid);
     const auto &xuid = info.xuid;
     if (server.getBanList().isBanned(name, uuid, xuid)) {

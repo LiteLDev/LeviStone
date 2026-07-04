@@ -31,4 +31,4 @@ void *get_original()
 
 #define ENDSTONE_HOOK_CALL_ORIGINAL(fp, ...) ENDSTONE_HOOK_CALL_ORIGINAL_NAME(fp, __FUNCDNAME__, ##__VA_ARGS__)
 #define ENDSTONE_HOOK_CALL_ORIGINAL_NAME(fp, name, ...) \
-    std::invoke(endstone::detail::fp_cast(fp, endstone::runtime::hook::get_original<name>()), ##__VA_ARGS__)
+    std::invoke(endstone::detail::fp_cast(fp, endstone::runtime::hook::details::get_original(name)), ##__VA_ARGS__)
