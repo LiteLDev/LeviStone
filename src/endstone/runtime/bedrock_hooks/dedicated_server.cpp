@@ -16,9 +16,11 @@
 
 #include <iostream>
 
+#include <entt/locator/locator.hpp>
 #include <pybind11/embed.h>
 
 #include "../hook.h"
+#include "endstone/core/devtools/devtools.h"
 #include "endstone/core/logger_factory.h"
 #include "endstone/runtime/endstone_runtime.h"
 #include "endstone/runtime/runtime.h"
@@ -49,6 +51,12 @@ DedicatedServer::ServerExitCode DedicatedServer::start(const std::string &sessio
 
     // Close stdin so that the ConsoleInputReader thread exits as soon as it begins
     endstone::runtime::stdin_close();
+
+#ifdef ENDSTONE_WITH_DEVTOOLS
+    // DevTools
+    std::thread thread(&endstone::core::devtools::render);
+    thread.detach();
+#endif
 
     // Start the dedicated server (call origin)
     entt::locator<DedicatedServer *>::emplace(this);

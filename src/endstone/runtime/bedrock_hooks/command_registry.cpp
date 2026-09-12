@@ -16,6 +16,6 @@ void CommandRegistry::registerCommand(const std::string &name, char const *descr
     }
     core::CommandPermissions::registerPermission(
         "minecraft.command." + name, name,
-        fmt::format("Allows the user to use the /{} command provided by LeviLamina mods.", name), *result);
+        std::format("Allows the user to use the /{} command provided by LeviLamina mods.", name), *result);
     result->recalculatePermissibles();
 }

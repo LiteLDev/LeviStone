@@ -1,42 +1,35 @@
 add_rules("mode.debug", "mode.release")
 
 add_repositories("levimc-repo https://github.com/LiteLDev/xmake-repo.git")
+add_repositories("local-repo repository")
 
 add_requires("aklomp-base64 0.5.2", {configs = {cxflags = "-clang:-Wno-error"}})
-add_requires("boost 1.84.0")
+add_requires("boost 1.91.0-1")
 add_requires("moodycamelconqueue 1.0.4")
 add_requires("cpptrace 1.0.4")
 add_requires("date 3.0.4")
 add_requires("entt v3.15.0")
 add_requires("expected-lite v0.8.0")
-add_requires("fmt 11.2.0")
-add_requires("glm 1.0.1")
+add_requires("fmt 12.1.0")
+add_requires("glm 1.0.3")
 add_requires("magic_enum v0.9.7")
-add_requires("gsl v4.2.0")
+add_requires("gsl v4.2.2")
 add_requires("pybind11 3.0.1")
+-- clang-cl disables C++ exceptions by default, and xmake's
+-- package snippet check only injects /EHsc for the "cl" tool, so compile checks
+-- of packages using try/catch (e.g. pybind11) fail without this.
+add_requireconfs("pybind11", {configs = {cxflags = "/EHsc"}})
 add_requires("replxx 2021.11.25")
 add_requires("toml++ v3.3.0")
 add_requires("zstr v1.0.7")
 add_requires("demangler")
+add_requires("raknet")
 
-add_requires("microsoft-detours 9764cebcb1a75940e68fa83d6730ffaf0f669401")
-add_requires("mimalloc v2.1.7")
+add_requires("microsoft-detours a1dd93fddfbba5ad07992edbaf4a296dcfca8d6f")
+add_requires("mimalloc v3.5.0")
 
-add_requires("levilamina 26.20.0")
+add_requires("levilamina 26.32.*")
 add_requires("levibuildscript")
-
-local get_version = function(os)
-    local tags = os.iorun("git describe --tags --long")
-    local tag, num_commits, commit_hash = tags:match("v?(%S+)-(%d+)-g([a-f0-9]+)")
-    if tonumber(num_commits) > 0 then
-        local major, minor, patch = tag:match("(%d+)%.(%d+)%.(%d+)")
-        if major and minor and patch then
-            tag = string.format("%s.%s.%d", major, minor, tonumber(patch) + 1)
-        end
-        tag = tag..".dev"..num_commits
-    end
-    return tag
-end
 
 set_project("endstone")
 set_languages("c++20")
@@ -46,8 +39,22 @@ set_toolchains("clang-cl")
 target("endstone")
     set_kind("headeronly")
     set_languages("c++20")
-    add_includedirs("endstone/include", {interface = true})
+    add_includedirs("endstone/include", "$(builddir)/generated", {interface = true})
     add_packages("fmt", "expected-lite", {interface = true})
+    set_configdir("$(builddir)/generated/endstone")
+    add_configfiles("endstone/include/endstone/version.h.in", {pattern = "@(.-)@"})
+    on_load(function (target)
+        local tags = os.iorun("git describe --tags --long")
+        local tag, num_commits, commit_hash = tags:match("v?(%S+)-(%d+)-g([a-f0-9]+)")
+        local major, minor, patch = tag:match("(%d+)%.(%d+)%.(%d+)")
+        target:set("configvar", "PROJECT_VERSION_MAJOR", major)
+        target:set("configvar", "PROJECT_VERSION_MINOR", minor)
+        target:set("configvar", "PROJECT_VERSION_PATCH", patch)
+        if tonumber(num_commits) > 0 then
+            tag = string.format("%s.%s.%d.dev%s", major, minor, tonumber(patch) + 1, num_commits)
+        end
+        target:set("configvar", "ENDSTONE_VERSION_FULL", tag)
+    end)
 
 target("bedrock")
     set_kind("object")
@@ -61,10 +68,11 @@ target("bedrock")
     add_cxflags("/O2 /DNDEBUG /Gy")
     add_defines("ENTT_SPARSE_PAGE=2048", "ENTT_PACKED_PAGE=128", "ENTT_NO_MIXIN", {public = true})
     add_deps("endstone")
-    add_packages("aklomp-base64", "boost", "fmt", "entt", "glm", "magic_enum", "gsl", "expected-lite", {public = true})
+    add_packages("aklomp-base64", "boost", "fmt", "entt", "glm", "magic_enum", "gsl", "expected-lite", "raknet", {public = true})
 
 target("endstone_python")
     set_basename("_python")
+    add_includedirs("endstone/src")
     add_rules("python.module")
     add_files("endstone/src/endstone/python/**.cpp")
     add_files("src/endstone/python/**.cpp")
@@ -95,9 +103,6 @@ target("endstone_core")
     remove_files("endstone/src/endstone/core/signal_handler.cpp")
     add_deps("bedrock")
     add_packages("moodycamelconqueue", "cpptrace", "date", "replxx", "pybind11", "toml++", "zstr", "levilamina", {public = true})
-    on_load(function (target)
-        target:add("defines", "ENDSTONE_VERSION=\""..get_version(os).."\"")
-    end)
 
 target("endstone_runtime")
     set_kind("shared")

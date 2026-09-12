@@ -15,6 +15,7 @@
 #pragma once
 
 #include <cstdint>
+#include <format>
 #include <functional>
 #include <map>
 #include <memory>
@@ -25,10 +26,9 @@
 #include <utility>
 #include <vector>
 
-#include <fmt/format.h>
-
 #include "bedrock/bedrock.h"
 #include "bedrock/core/utility/type_id.h"
+#include "bedrock/forward.h"
 #include "bedrock/network/packet/available_commands_packet.h"
 #include "bedrock/platform/brstd/copyable_function.h"
 #include "bedrock/server/commands/command_flag.h"
@@ -75,7 +75,7 @@ public:
     int addEnumValues(const std::string &name, const std::vector<std::string> &values);
     int addSoftEnum(const std::string &name, std::vector<std::string> values);
     ENDSTONE_HOOK void registerCommand(const std::string &name, char const *description, CommandPermissionLevel level,
-                         CommandFlag flag1, CommandFlag flag2);
+                                       CommandFlag flag1, CommandFlag flag2);
     void registerAlias(std::string name, std::string alias);
 
 private:
@@ -195,13 +195,25 @@ public:
         Symbol() = default;
         Symbol(size_t value) : value_(static_cast<int>(value)) {};
         Symbol(HardNonTerminal value) : value_(static_cast<int>(value)) {};
-        Symbol(const Symbol &other) { value_ = other.value_; }
+        Symbol(const Symbol &other)
+        {
+            value_ = other.value_;
+        }
 
-        bool operator==(const Symbol &other) const { return value_ == other.value_; }
+        bool operator==(const Symbol &other) const
+        {
+            return value_ == other.value_;
+        }
 
-        [[nodiscard]] int value() const { return value_; }
+        [[nodiscard]] int value() const
+        {
+            return value_;
+        }
 
-        [[nodiscard]] std::size_t toIndex() const { return value_ & 0xE00FFFFF; }
+        [[nodiscard]] std::size_t toIndex() const
+        {
+            return value_ & 0xE00FFFFF;
+        }
 
         [[nodiscard]] bool isTerminal() const;
         [[nodiscard]] bool isEnum() const;
@@ -212,11 +224,17 @@ public:
         [[nodiscard]] bool isEnumValue() const;
         [[nodiscard]] bool isChainedSubcommandValue() const;
         [[nodiscard]] bool isSoftEnum() const;
-        static Symbol fromEnumIndex(size_t index) { return {index | EnumBit | NonTerminalBit}; }
+        static Symbol fromEnumIndex(size_t index)
+        {
+            return {index | EnumBit | NonTerminalBit};
+        }
         static Symbol fromOptionalIndex(size_t index);
         static Symbol fromFactorizationIndex(size_t index);
         static Symbol fromPostfixIndex(size_t index);
-        static Symbol fromEnumValueIndex(size_t index) { return {index | EnumValueBit}; }
+        static Symbol fromEnumValueIndex(size_t index)
+        {
+            return {index | EnumValueBit};
+        }
         static Symbol fromSoftEnumIndex(size_t index);
         static Symbol fromChainedSubcommandIndex(size_t index);
         static Symbol fromChainedSubcommandValueIndex(size_t index);
@@ -288,7 +306,7 @@ public:
         ParseFunction parse;
         Symbol symbol;
     };
-    template<typename T>
+    template <typename T>
     struct ParseRuleFor {
         static const ParamParseRule instance;
     };
@@ -418,6 +436,8 @@ private:
     std::unordered_set<int> allow_empty_symbols_;                                                // +792
     CommandOverrideFunctor command_override_functor_;
     std::unique_ptr<CommandRunStats> command_run_stats_;
+    std::string (*auto_complete_player_mention_)(const std::string &, const PlayerListEntries &,
+                                                 AutoCompleteInformation &);
 };
 
 enum class CommandParameterOption : std::uint8_t {
@@ -480,29 +500,29 @@ const CommandRegistry::Overload *CommandRegistry::registerOverload(const char *n
 }
 
 template <>
-struct fmt::formatter<CommandRegistry::ParseToken> : formatter<string_view> {
+struct std::formatter<CommandRegistry::ParseToken> : std::formatter<std::string_view> {
     auto format(const CommandRegistry::ParseToken &token, format_context &ctx) const -> format_context::iterator
     {
-        auto out = fmt::format_to(ctx.out(), "[");
+        auto out = std::format_to(ctx.out(), "[");
         for (const auto *it = &token; it; it = it->next.get()) {
             if (it != &token) {
-                out = fmt::format_to(out, ", ");
+                out = std::format_to(out, ", ");
             }
-            out = fmt::format_to(out, R"({{"type": "{}")", it->type.value());
+            out = std::format_to(out, R"({{"type": "{}")", it->type.value());
             if (it->text != nullptr && it->length > 0) {
                 std::string_view text(it->text, it->length);
                 if (it->type == CommandRegistry::HardNonTerminal::Id && text.size() >= 2 && text.front() == '"' &&
                     text.back() == '"') {
                     text = text.substr(1, text.size() - 2);
                 }
-                out = fmt::format_to(out, R"(, "text": "{}")", text);
+                out = std::format_to(out, R"(, "text": "{}")", text);
             }
             if (it->child != nullptr) {
-                out = fmt::format_to(out, R"(, "children": {})", *it->child);
+                out = std::format_to(out, R"(, "children": {})", *it->child);
             }
-            out = fmt::format_to(out, "}}");
+            out = std::format_to(out, "}}");
         }
-        out = fmt::format_to(ctx.out(), "]");
+        out = std::format_to(ctx.out(), "]");
         return out;
     }
-};  // namespace fmt
+};

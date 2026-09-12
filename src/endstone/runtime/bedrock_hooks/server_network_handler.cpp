@@ -1,15 +1,28 @@
+// Copyright (c) 2024, The Endstone Project. (https://endstone.dev) All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #include "bedrock/network/server_network_handler.h"
 
-#include <entt/entt.hpp>
 #include <magic_enum/magic_enum.hpp>
 
 #include "bedrock/locale/i18n.h"
 #include "bedrock/network/packet/disconnect_packet.h"
+#include "bedrock/server/server_instance.h"
 #include "endstone/core/entity/components/flag_components.h"
 #include "endstone/core/player.h"
 #include "endstone/core/server.h"
 #include "endstone/core/util/socket_address.h"
-#include "endstone/core/util/uuid.h"
 #include "endstone/event/player/player_kick_event.h"
 #include "endstone/event/player/player_login_event.h"
 #include "endstone/runtime/hook.h"
@@ -60,6 +73,27 @@ bool ServerNetworkHandler::tryToLoadPlayer(ServerPlayer &server_player, const Co
     return new_player;
 }
 
+// ServerPlayer &ServerNetworkHandler::_createNewPlayer(const NetworkIdentifier &network_id,
+//                                                      const SubClientConnectionRequest &sub_client_connection_request,
+//                                                      const PlayerAuthenticationInfo &player_info,
+//                                                      SubClientId sub_client_id)
+// {
+//     auto &server_player = ENDSTONE_HOOK_CALL_ORIGINAL(&ServerNetworkHandler::_createNewPlayer, this, network_id,
+//                                                       sub_client_connection_request, player_info, sub_client_id);
+//     const auto &server = endstone::core::EndstoneServer::getInstance();
+//     auto &endstone_player = server_player.getEndstoneActor<endstone::core::EndstonePlayer>();
+//     endstone_player.initFromConnectionRequest(sub_client_connection_request);
+//
+//     endstone::PlayerLoginEvent e{endstone_player};
+//     server.getPluginManager().callEvent(e);
+//
+//     if (e.isCancelled()) {
+//         const auto identifier = server_player.getPersistentComponent<UserEntityIdentifierComponent>();
+//         disconnect(identifier->getNetworkId(), identifier->getSubClientId(), e.getKickMessage());
+//     }
+//     return server_player;
+// }
+
 ServerPlayer *ServerNetworkHandler::getServerPlayer(const NetworkIdentifier &source, SubClientId sub_id)
 {
     for (const auto &entity_context : level_->getUsers()) {
@@ -82,6 +116,8 @@ ServerPlayer *ServerNetworkHandler::getServerPlayer(const NetworkIdentifier &sou
 void ServerNetworkHandler::disconnect(NetworkIdentifier const &network_id, SubClientId sub_client_id,
                                       std::string const &reason)
 {
+    // Add InternalDisconnectFlagComponent to indicate this is an intended disconnect by us internally
+    // to avoid calling PlayerKickEvent
     if (auto *player = getServerPlayer(network_id, sub_client_id)) {
         player->addOrRemoveComponent<endstone::core::InternalDisconnectFlagComponent>(true);
     }
@@ -92,6 +128,7 @@ void ServerNetworkHandler::disconnect(NetworkIdentifier const &network_id, SubCl
 std::optional<PlayerAuthenticationInfo> ServerNetworkHandler::_validateLoginPacket(const NetworkIdentifier &source,
                                                                                    const LoginPacket &packet)
 {
+    // Check for IP-bans
     const auto &server = endstone::core::EndstoneServer::getInstance();
     auto address = endstone::core::EndstoneSocketAddress::fromNetworkIdentifier(source);
     auto network_handler = server.getServer().getMinecraft()->getServerNetworkHandler();
@@ -104,21 +141,21 @@ std::optional<PlayerAuthenticationInfo> ServerNetworkHandler::_validateLoginPack
         return std::nullopt;
     }
 
+    // Run the original logics first so invalid login attempts will be rejected right away.
     auto auth_info = ENDSTONE_HOOK_CALL_ORIGINAL(&ServerNetworkHandler::_validateLoginPacket, this, source, packet);
     if (!auth_info) {
         return auth_info;
     }
 
     const auto &info = *auth_info;
-    const auto &name =
-        info.xuid.empty() ? packet.payload.connection_request->getThirdPartyName() : info.xbox_live_name;
+    const auto &name = info.xuid.empty() ? packet.payload.connection_request->getThirdPartyName() : info.xbox_live_name;
     const auto uuid = endstone::core::EndstoneUUID::fromMinecraft(info.authenticated_uuid);
     const auto &xuid = info.xuid;
     if (server.getBanList().isBanned(name, uuid, xuid)) {
         const gsl::not_null ban_entry = server.getBanList().getBanEntry(name, uuid, xuid);
-        if (const auto kick_reason = ban_entry->getReason(); !kick_reason.empty()) {
+        if (const auto reason = ban_entry->getReason(); !reason.empty()) {
             server.getServer().getMinecraft()->getServerNetworkHandler()->disconnect(
-                source, SubClientId::PrimaryClient, "You have been banned from this server. Reason: " + kick_reason);
+                source, SubClientId::PrimaryClient, "You have been banned from this server. Reason: " + reason);
         }
         else {
             server.getServer().getMinecraft()->getServerNetworkHandler()->disconnect(
@@ -126,5 +163,6 @@ std::optional<PlayerAuthenticationInfo> ServerNetworkHandler::_validateLoginPack
         }
         return std::nullopt;
     }
+    // TODO(event): PlayerPreLoginEvent
     return auth_info;
 }

@@ -21,6 +21,7 @@
 #include <ll/api/io/LoggerRegistry.h>
 #include <ll/api/io/Sink.h>
 #include <ll/api/mod/NativeMod.h>
+#include <ll/api/utils/StringUtils.h>
 
 namespace endstone::core {
 
