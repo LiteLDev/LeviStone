@@ -22,7 +22,7 @@ add_requires("demangler")
 add_requires("microsoft-detours 9764cebcb1a75940e68fa83d6730ffaf0f669401")
 add_requires("mimalloc v2.1.7")
 
-add_requires("levilamina 26.20.0")
+add_requires("levilamina 26.40.0")
 add_requires("levibuildscript")
 
 local get_version = function(os)

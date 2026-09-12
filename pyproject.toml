@@ -39,6 +39,7 @@ dependencies = [
     "rich",
     "tomlkit",
     "typing-extensions",
+    "endstone>=0.11.7",
 ]
 dynamic = ["version"]
 
