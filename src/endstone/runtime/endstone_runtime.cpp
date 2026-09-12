@@ -28,6 +28,11 @@ void unload_endstone_server();
 void disable_endstone_server();
 void enable_endstone_server();
 
+class EndstoneServer {
+public:
+    static void setMainThread(std::thread::id thread_id);
+};
+
 EndstoneRuntime &EndstoneRuntime::getInstance()
 {
     static EndstoneRuntime instance;
@@ -47,6 +52,7 @@ bool EndstoneRuntime::load()
     auto &logger = getSelf().getLogger();
     try {
         logger.info("Initialising...");
+        endstone::core::EndstoneServer::setMainThread(std::this_thread::get_id());
         // Install hooks
         runtime::hook::install();
     }
@@ -58,6 +64,8 @@ bool EndstoneRuntime::load()
     enabled = true;
     return true;
 }
+
+// EndstoneRuntime::enable() + EndstoneRuntime::disable() Equals to EndstoneServer::reload()
 
 bool EndstoneRuntime::enable()
 {

@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <format>
 #include <functional>
@@ -282,9 +283,7 @@ public:
         int first_factorization;                                // +132
         int first_optional;                                     // +136
         bool runnable;                                          // +140
-        bool has_chained_subcommands;                           // +141
-        bool finalized_chained_subcommands;                     // +142
-        std::int64_t rule_counter;                              // +144
+        std::size_t rule_counter;                               // +144
     };
 
     struct ParseToken {
@@ -501,7 +500,8 @@ const CommandRegistry::Overload *CommandRegistry::registerOverload(const char *n
 
 template <>
 struct std::formatter<CommandRegistry::ParseToken> : std::formatter<std::string_view> {
-    auto format(const CommandRegistry::ParseToken &token, format_context &ctx) const -> format_context::iterator
+    template <typename FormatContext>
+    auto format(const CommandRegistry::ParseToken &token, FormatContext &ctx) const
     {
         auto out = std::format_to(ctx.out(), "[");
         for (const auto *it = &token; it; it = it->next.get()) {
