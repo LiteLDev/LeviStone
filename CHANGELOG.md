@@ -8,11 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [0.11.11] - 2026-09-19
 
 Endstone [0.11.11](https://github.com/EndstoneMC/endstone/tree/v0.11.11)
-LeviLamina 26.51.*
+LeviLamina >=26.51.1 <26.60.0
 
 ### Changed
 
-- Adapted to LeviLamina 26.51.*
+- Adapted to LeviLamina 26.51.1
 
 ## [0.11.10] - 2026-09-12
 
