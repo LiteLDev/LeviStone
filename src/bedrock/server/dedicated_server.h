@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <entt/locator/locator.hpp>
+
 #include "bedrock/bedrock.h"
 #include "bedrock/common_types.h"
 #include "bedrock/core/utility/unique_owner_pointer.h"
@@ -60,4 +62,50 @@ private:
     std::atomic<ServerExitCode> result_;
     std::unique_ptr<ConsoleInputReader> console_input_reader_;
     //...
+};
+
+/**
+ * @brief Service locator holding the (non-owning) pointer to the dedicated server instance.
+ *
+ * entt 4 constrains the type used to initialise a locator with `stl::derived_from<Service>`, which
+ * no type can ever satisfy when `Service` is a pointer. As the instance is owned by the application
+ * rather than by the locator, this specialisation stores it as a plain pointer instead.
+ *
+ * Only the members actually used by the runtime hooks are provided on purpose, so that any other
+ * use of this locator fails to compile rather than silently diverging from entt's implementation.
+ */
+template <>
+class entt::locator<DedicatedServer *> final {
+public:
+    using type = DedicatedServer *;  // NOLINT(*-identifier-naming)
+
+    locator() = delete;
+    locator(const locator &) = delete;
+    ~locator() = delete;
+    locator &operator=(const locator &) = delete;
+
+    [[nodiscard]] static bool has_value() noexcept
+    {
+        return (service != nullptr);
+    }
+
+    [[nodiscard]] static DedicatedServer *&value() noexcept
+    {
+        ENTT_ASSERT(has_value(), "Service not available");
+        return service;
+    }
+
+    static DedicatedServer *&emplace(DedicatedServer *elem) noexcept
+    {
+        return (service = elem);
+    }
+
+    static void reset() noexcept
+    {
+        service = nullptr;
+    }
+
+private:
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    inline static DedicatedServer *service{};
 };
