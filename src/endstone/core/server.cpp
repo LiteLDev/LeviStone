@@ -160,27 +160,6 @@ EndstoneServer::EndstoneServer() : logger_(LoggerFactory::getLogger(""))
         toml::table tbl = toml::parse_file("endstone.toml");
         log_commands_ = tbl.at_path("commands.log").value_or(true);
         allow_client_packs_ = tbl.at_path("settings.allow-client-packs").value_or(false);
-        if (const auto *servers = tbl.at_path("network.stun-servers").as_array()) {
-            for (const auto &node : *servers) {
-                auto uri = node.value_or(std::string{});
-                if (uri.empty()) {
-                    continue;
-                }
-                // Bedrock rejects the whole configuration if any URI is malformed, which stops every
-                // session from being created, so drop the bad entry instead of passing it on.
-                if (!uri.starts_with("stun:") && !uri.starts_with("stuns:")) {
-                    EndstoneServer::getLogger().error(
-                        "Ignoring STUN server '{}': only stun: and stuns: URIs are supported.", uri);
-                    continue;
-                }
-                if (uri.find('@') != std::string::npos || uri.find('?') != std::string::npos) {
-                    EndstoneServer::getLogger().error("Ignoring STUN server '{}': the URI must not contain '@' or '?'.",
-                                                      uri);
-                    continue;
-                }
-                stun_servers_.push_back({std::move(uri), {}, {}});
-            }
-        }
     }
     catch (const toml::parse_error &err) {
         EndstoneServer::getLogger().error("Failed to parse config file: {}", err.what());
@@ -328,6 +307,11 @@ const std::string *EndstoneServer::getContentKey(const PackIdVersion &pack_id) c
 bool EndstoneServer::getAllowClientPacks() const
 {
     return allow_client_packs_;
+}
+
+const std::vector<std::string> &EndstoneServer::getStunServers() const
+{
+    return stun_servers_;
 }
 
 bool EndstoneServer::logCommands() const
@@ -907,16 +891,6 @@ std::uint16_t EndstoneServer::getSignalingPort() const
     }
     const NetherNet::HttpServer &server = static_cast<const NetherNet::HttpSignalingServer &>(*signaling);
     return server.port_;
-}
-
-void EndstoneServer::applyStunConfig() const
-{
-    if (stun_servers_.empty() || !isUsingNetherNet()) {
-        return;
-    }
-    const auto &connector = static_cast<const NetherNetConnector &>(getRemoteConnector());
-    connector.transport_->SetRelayConfig(stun_servers_);
-    getLogger().info("Configured {} STUN server(s) for NetherNet.", stun_servers_.size());
 }
 
 EndstoneServer &EndstoneServer::getInstance()

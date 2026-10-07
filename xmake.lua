@@ -103,6 +103,7 @@ target("endstone_core")
     remove_files("endstone/src/endstone/core/logger_factory.cpp")
     remove_files("endstone/src/endstone/core/signal_handler.cpp")
     remove_files("endstone/src/endstone/core/server.cpp")
+    remove_files("endstone/src/endstone/core/network/stun_client.cpp")
     add_deps("bedrock")
     add_packages("moodycamelconqueue", "cpptrace", "date", "replxx", "pybind11", "toml++", "zstr", "levilamina", {public = true})
 
