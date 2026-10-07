@@ -72,3 +72,7 @@ scm.git.describe_command = "git describe --tags --long --match *[0-9]*"
 [tool.ruff]
 line-length = 120
 lint.extend-select = ["I", "E", "F"]
+
+# Don't repair Windows wheels
+[tool.cibuildwheel.windows]
+repair-wheel-command = ""
