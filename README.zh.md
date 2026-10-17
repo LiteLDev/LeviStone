@@ -30,4 +30,4 @@ LeviLamina 只支持每个 Minecraft 协议版本中的一个版本，而 Endsto
 
 ### 如何知道我应该安装哪个版本？
 
-通过查看 [LeviLamina支持的版本](https://lamina.levimc.org/zh/versions/) 和 [Endstone的发布页面](https://github.com/EndstoneMC/endstone/releases)。
+通过查看 [LeviLamina支持的版本](https://docs.levimc.org/LeviLamina/zh/versions/) 和 [Endstone的发布页面](https://github.com/EndstoneMC/endstone/releases)。

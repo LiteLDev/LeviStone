@@ -30,4 +30,4 @@ LeviLamina only supports one version from each Minecraft protocol version, while
 
 ### How do I know which version I should install?
 
-Check the [LeviLamina supported versions](https://lamina.levimc.org/versions/) and the [Endstone release page](https://github.com/EndstoneMC/endstone/releases).
+Check the [LeviLamina supported versions](https://docs.levimc.org/LeviLamina/versions/) and the [Endstone release page](https://github.com/EndstoneMC/endstone/releases).
