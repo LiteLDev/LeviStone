@@ -41,7 +41,7 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-Changelog = "https://endstone.dev/latest/changelog"
+Changelog = "https://endstone.dev/latest/changelog/"
 Discussions = "https://github.com/orgs/EndstoneMC/discussions"
 Documentation = "https://endstone.dev"
 Homepage = "https://github.com/EndstoneMC/endstone"
