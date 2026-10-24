@@ -1,5 +1,7 @@
 # LeviStone
 
+<img src="docs/logo.png" alt="" width="128" align="right">
+
 English | [中文](README.zh.md)
 
 A runtime for running [Endstone](https://github.com/EndstoneMC/endstone) plugins on [LeviLamina](https://github.com/LiteLDev/LeviLamina)

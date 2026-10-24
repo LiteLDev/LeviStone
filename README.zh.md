@@ -1,5 +1,7 @@
 # LeviStone
 
+<img src="docs/logo.png" alt="" width="128" align="right">
+
 [English](README.md) | 中文
 
 一个用于在 [LeviLamina](https://github.com/LiteLDev/LeviLamina) 上运行 [Endstone](https://github.com/EndstoneMC/endstone) 插件的运行时。
