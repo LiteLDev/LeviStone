@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "levistone"
-authors = [{ name = "Vincent Wu", email = "magicdroidx@gmail.com" }]
-description = "Endstone offers a plugin API for Bedrock Dedicated Servers, supporting both Python and C++."
+authors = [{ name = "LeviMC" }]
+description = "A runtime for running Endstone plugins on LeviLamina (Python plugins only)."
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["plugin", "python", "minecraft", "bedrock"]
@@ -41,11 +41,11 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-Changelog = "https://endstone.dev/latest/changelog/"
-Discussions = "https://github.com/orgs/EndstoneMC/discussions"
+Changelog = "https://github.com/LiteLDev/LeviStone/blob/main/CHANGELOG.md"
 Documentation = "https://endstone.dev"
-Homepage = "https://github.com/EndstoneMC/endstone"
-Issues = "https://github.com/EndstoneMC/endstone/issues"
+Homepage = "https://github.com/LiteLDev/LeviStone"
+Issues = "https://github.com/LiteLDev/LeviStone/issues"
+Repository = "https://github.com/LiteLDev/LeviStone"
 
 [tool.setuptools]
 package-dir = { "" = "bin/EndstoneRuntime" }
