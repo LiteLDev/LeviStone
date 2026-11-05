@@ -177,19 +177,6 @@ private:
     std::optional<py::gil_scoped_release> no_gil_;
 };
 
-namespace {
-// Let any queued task wake an idle chunk generation worker, not only 50 ms of backlog per busy worker.
-void patchAsyncWorkerPoolMinBacklog(endstone::core::EndstoneServer &server)
-{
-    auto &async = *BEDROCK_VAR(Bedrock::NonOwnerPointer<WorkerPool> *, "MinecraftWorkerPool::ASYNC");
-    if (!async || async->min_backlog_duration_seconds_ != 0.05F) {
-        server.getLogger().warning("Unexpected async worker pool, leaving its wake threshold unchanged.");
-        return;
-    }
-    async->min_backlog_duration_seconds_ = 0.0F;
-}
-}  // namespace
-
 ServerInitialization::ServerInitResult ServerInstance::initializeServer(ServerInstanceInitArguments &&args)
 {
     auto result = ENDSTONE_HOOK_CALL_ORIGINAL(&ServerInstance::initializeServer, this,
