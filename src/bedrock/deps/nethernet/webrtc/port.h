@@ -12,12 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "bedrock/deps/webrtc/port.h"
+#pragma once
 
-#include "endstone/runtime/hook.h"
+#include <string_view>
 
-void webrtc::Port::SendBindingErrorResponse(StunMessage *message, const SocketAddress &addr, int error_code,
-                                            std::string_view reason)
-{
-    ENDSTONE_HOOK_CALL_ORIGINAL(&Port::SendBindingErrorResponse, this, message, addr, error_code, reason);
-}
+#include "bedrock/bedrock.h"
+
+namespace webrtc {
+
+class SocketAddress;
+class StunMessage;
+
+class Port {
+public:
+    virtual void SendBindingErrorResponse(StunMessage *message, const SocketAddress &addr, int error_code,
+                                          std::string_view reason);
+};
+
+}  // namespace webrtc

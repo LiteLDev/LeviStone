@@ -1,0 +1,87 @@
+// Copyright (c) 2024, The Endstone Project. (https://endstone.dev) All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#pragma once
+
+#include <memory>
+#include <optional>
+#include <string>
+#include <unordered_map>
+
+#include "bedrock/bedrock.h"
+#include "bedrock/certificates/identity/game_server_token.h"
+#include "bedrock/core/utility/callback_token.h"
+#include "bedrock/network/server_network_system.h"
+#include "bedrock/world/actor/actor_unique_id.h"
+#include "bedrock/world/actor/player/player.h"
+#include "bedrock/world/actor/player/player_party_info.h"
+#include "bedrock/world/inventory/inventory_menu.h"
+
+class ServerPlayer : public Player {
+public:
+    using OnPlayerLoadedCallback = std::function<void(ServerPlayer &)>;
+
+    ServerPlayer(Level &, PacketSender &, ServerNetworkSystem &, ClientBlobCache::Server::ActiveTransfersManager &,
+                 GameType, bool, const NetworkIdentifier &, const SubClientId, ServerPlayer::OnPlayerLoadedCallback,
+                 mce::UUID, const std::string &, PlayerAuthenticationType, const PlayerAuthenticationInfo &, int, bool,
+                 EntityContext &, PlatformType, InputMode, SyncedClientOptionsComponent);
+    ~ServerPlayer() override = 0;
+    ENDSTONE_HOOK void changeDimension(DimensionType toId) override;  // TODO(fixme): enable the hook
+
+protected:
+    [[nodiscard]] virtual int _getSpawnChunkLimit() const = 0;
+    virtual void _updateChunkPublisherView(const Vec3 &position, float min_distance);
+    PlatformType platform_type_;
+    std::string language_code_;
+
+private:
+    ServerNetworkSystem &network_;
+    OnPlayerLoadedCallback on_player_loaded_callback_;
+    InventoryMenu inventory_menu_;
+    ContainerID container_counter_;
+    CallbackToken close_container_token_;
+    uint32_t max_chunk_radius_;
+    bool is_initial_player_load_happening_;
+    bool is_teacher_;
+    bool is_external_communication_allowed_;
+    bool local_player_initialized_;  // +3531
+    bool waiting_for_ticking_areas_preload_;
+    Tick prev_shield_blocking_tick_;
+    uint32_t client_view_radius_;
+    uint32_t client_requested_radius_;
+    bool is_compatible_with_client_side_chunk_gen_;
+    std::optional<PlayerPartyInfo> party_info_;
+    int remaining_structure_refresh_ticks_;
+    StructureFeatureType current_structure_feature_;
+    struct NearbyActor {
+        enum class State : int {
+            Unknown = 0,
+            New = 1,
+            Exist = 2,
+            DidExist = 3,
+        };
+        NearbyActor();
+        bool is_autonomous;
+        State state;
+        Actor *temp_actor;
+    };
+    std::unordered_map<ActorUniqueID, NearbyActor> nearby_actors_;
+    // ...
+
+public:
+    [[nodiscard]] const std::unordered_map<ActorUniqueID, NearbyActor> &getNearbyActors() const  // Endstone
+    {
+        return nearby_actors_;
+    }
+};

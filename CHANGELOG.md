@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.11.14] - 2026-11-05
+
+Endstone [0.11.13](https://github.com/EndstoneMC/endstone/tree/v0.11.13)
+LeviLamina 26.51.9
+
+### Removed
+
+- Removed most of endstone's built-in optimization, because they have been ported to [LeviOptimize](https://github.com/LiteLDev/LeviOptimize)
+
 ## [0.11.13] - 2026-10-07
 
 Endstone [0.11.13](https://github.com/EndstoneMC/endstone/tree/v0.11.13)
@@ -82,6 +91,7 @@ Bedrock Deidcated Server 1.21.132.3
 
 - Fixed loading on Wine
 
+[0.11.14]: https://github.com/LiteLDev/LeviStone/compare/v0.11.13...v0.11.14
 [0.11.13]: https://github.com/LiteLDev/LeviStone/compare/v0.11.12...v0.11.13
 [0.11.12]: https://github.com/LiteLDev/LeviStone/compare/v0.11.11...v0.11.12
 [0.11.11]: https://github.com/LiteLDev/LeviStone/compare/v0.11.10...v0.11.11

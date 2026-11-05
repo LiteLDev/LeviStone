@@ -54,7 +54,7 @@ private:
     }
 };
 
-static_assert(entt::entt_traits<EntityId>::page_size == 2048, "ENTT_SPARSE_PAGE should be set to 2048.");
+static_assert(entt::entt_traits<EntityId>::page_size == 4096, "ENTT_SPARSE_PAGE should be set to 4096.");
 static_assert(std::is_same_v<entt::storage_type<EntityId>::type, entt::basic_storage<EntityId>>,
               "ENTT_NO_MIXIN is not defined.");
 using EnTTRegistry = entt::basic_registry<EntityId>;

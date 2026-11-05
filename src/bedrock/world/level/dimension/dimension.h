@@ -1,0 +1,147 @@
+// Copyright (c) 2024, The Endstone Project. (https://endstone.dev) All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#pragma once
+
+#include <memory>
+#include <unordered_map>
+#include <vector>
+
+#include "bedrock/core/threading/task_group.h"
+#include "bedrock/forward.h"
+#include "bedrock/gamerefs/owner_ptr.h"
+#include "bedrock/network/packet.h"
+#include "bedrock/platform/brstd/function_ref.h"
+#include "bedrock/platform/brstd/move_only_function.h"
+#include "bedrock/world/actor/actor_unique_id.h"
+#include "bedrock/world/level/biome/registry/biome_registry.h"
+#include "bedrock/world/level/block_source.h"
+#include "bedrock/world/level/chunk/chunk_source.h"
+#include "bedrock/world/level/dimension/dimension_height_range.h"
+#include "bedrock/world/level/dimension/dimension_type.h"
+#include "bedrock/world/level/level_listener.h"
+#include "bedrock/world/level/levelgen/v2/providers/int_provider.h"
+#include "bedrock/world/level/saveddata/saved_data.h"
+#include "bedrock/world/level/weather.h"
+#include "bedrock/world/redstone/circuit/circuit_system.h"
+
+class Level;
+
+struct DerivedDimensionArguments {
+    ILevel &level;
+    brstd::move_only_function<std::unique_ptr<TaskGroup>(std::string_view)> create_task_group;
+};
+
+class IDimension {
+public:
+    virtual ~IDimension() = 0;
+    [[nodiscard]] virtual bool isNaturalDimension() const = 0;
+    virtual DimensionType getDimensionId() const = 0;
+    virtual void sendPacketForPosition(BlockPos const &, Packet const &, Player const *) = 0;
+    virtual void sendPacketForEntity(Actor const &actor, Packet const &packet, Player const *except) = 0;
+    virtual void flushLevelChunkGarbageCollector() = 0;
+    virtual void initializeWithLevelStorageManagerConnector(ILevelStorageManagerConnector &) = 0;
+    virtual BiomeRegistry &getBiomeRegistry() = 0;
+    [[nodiscard]] virtual BiomeRegistry const &getBiomeRegistry() const = 0;
+    virtual Vec3 translatePosAcrossDimension(Vec3 const &, DimensionType) = 0;
+    virtual void forEachPlayer(brstd::function_ref<bool(Player &)>) const = 0;
+    virtual Actor *fetchEntity(ActorUniqueID, bool) = 0;
+    [[nodiscard]] virtual BlockSource &getBlockSourceFromMainChunkSource() const = 0;
+    virtual void buildPlayersForPositionPacket(const BlockPos &, const Player *,
+                                               std::vector<NetworkIdentifierWithSubId> &) const = 0;
+    virtual void updatePoiBlockStateChange(const BlockPos &, const Block &, const Block &) const = 0;
+};
+
+class Dimension : public IDimension,
+                  public LevelListener,
+                  public SavedData,
+                  public Bedrock::EnableNonOwnerReferences,
+                  public EnableGetWeakRef<Dimension>,
+                  public std::enable_shared_from_this<Dimension> {
+public:
+    Dimension(ILevel &, DimensionType, DimensionHeightRange, Scheduler &, std::string);
+    ~Dimension() override;
+    void sendPacketForEntity(const Actor &actor, const Packet &packet, const Player *except) override;
+    void forEachPlayer(brstd::function_ref<bool(Player &)> callback) const override;
+
+    virtual void init(const br::worldgen::StructureSetRegistry &) = 0;
+    virtual void tick() = 0;
+    virtual void tickRedstone() = 0;
+    [[nodiscard]] virtual std::unique_ptr<WorldGenerator> createGenerator(
+        const br::worldgen::StructureSetRegistry &) = 0;
+    virtual void upgradeLevelChunk(ChunkSource &, LevelChunk &, LevelChunk &) = 0;
+    virtual void fixWallChunk(ChunkSource &, LevelChunk &) = 0;
+    void initializeWithLevelStorageManagerConnector(
+        ILevelStorageManagerConnector &level_storage_manager_connector) override = 0;
+    [[nodiscard]] virtual bool levelChunkNeedsUpgrade(const LevelChunk &) const = 0;
+    [[nodiscard]] bool isNaturalDimension() const override = 0;
+    [[nodiscard]] virtual bool isValidSpawn(int, int) const = 0;
+    [[nodiscard]] virtual Color getBrightnessDependentFogColor(const Color &, float) const = 0;
+    [[nodiscard]] virtual Height getCloudHeight() const = 0;
+    [[nodiscard]] virtual HashedString getDefaultBiome() const = 0;
+    [[nodiscard]] virtual bool mayRespawnViaBed() const = 0;
+    [[nodiscard]] virtual BlockPos getSpawnPos() const = 0;
+    [[nodiscard]] virtual int getSpawnYPosition() const = 0;
+
+    [[nodiscard]] bool isBrightOutside() const;
+    [[nodiscard]] std::string getLocalizationKey() const;
+    [[nodiscard]] Level &getLevel() const;
+    [[nodiscard]] ChunkSource &getChunkSource() const;
+    Weather &getWeather() const;
+    CircuitSystem &getCircuitSystem();
+    [[nodiscard]] bool isRedstoneTick() const;
+    [[nodiscard]] const std::string &getName() const;
+    [[nodiscard]] const std::string &getTypeId() const;
+    WeakRef<Dimension> getWeakRef();
+    [[nodiscard]] endstone::Dimension &getEndstoneDimension() const;  // Endstone
+
+private:
+    std::vector<ActorChunkTransferEntry> actor_chunk_transfer_queue_;  // +104
+    std::unordered_map<ChunkKey, std::vector<ActorUnloadedChunkTransferEntry>> actor_unloaded_chunk_transfer_queue_;
+    Level *level_;
+    DimensionHeightRange height_range_;
+    std::int16_t sea_level_;
+    std::uint8_t monster_spawn_block_light_limit_;
+    IntProvider monster_spawn_light_test_;
+    OwnerPtr<BlockSource> block_source_;  // +240
+    bool has_weather_;                    // +256
+    float mobs_per_chunk_surface_[7];
+    float mobs_per_chunk_underground_[7];
+    BrightnessPair default_brightness_;  // +316
+    // std::unique_ptr<BaseLightTextureImageBuilder> base_light_texture_image_builder_;
+    std::unique_ptr<DimensionBrightnessRamp> dimension_brightness_ramp_;
+    std::shared_ptr<LevelChunkMetaData> target_metadata_;
+    std::unique_ptr<RuntimeLightingManager> runtime_lighting_manager_;
+    std::string name_;
+    std::string type_id_;
+    DimensionType id_;
+    const DimensionIdType registry_id_;
+    bool ultra_warm_;  // +422
+    bool has_ceiling_;
+    bool has_skylight_;
+    Brightness sky_darken_;
+    std::unique_ptr<BlockEventDispatcher> dispatcher_;  // +432
+    std::unique_ptr<TaskGroup> task_group_;
+    std::unique_ptr<TaskGroup> chunk_gen_task_group_;
+    std::unique_ptr<PostprocessingManager> post_processing_manager_;
+    std::unique_ptr<SubChunkInterlocker> sub_chunk_interlocker_;
+    std::unique_ptr<ChunkSource> chunk_source_;
+    WorldGenerator *world_generator_;
+    std::unique_ptr<Weather> weather_;
+    std::unique_ptr<Seasons> seasons_;
+    std::unique_ptr<GameEventDispatcher> game_event_dispatcher_;
+    std::unique_ptr<CircuitSystem> circuit_system_;
+    const int CIRCUIT_TICK_RATE;
+    int circuit_system_tick_rate_;
+};
