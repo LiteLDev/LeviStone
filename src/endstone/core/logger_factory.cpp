@@ -75,7 +75,7 @@ public:
     template <class R>
     explicit McColorSink(R &&range)
     {
-        for (auto &sink : std::forward<R>(range)) {
+        for (auto [name, sink] : std::forward<R>(range)) {
             sinks.emplace_back(sink.shared_from_this());
         }
     }
@@ -115,8 +115,8 @@ public:
     explicit LogAdapter(std::shared_ptr<ll::io::Logger> logger) : logger_(std::move(logger))
     {
         auto sink = std::make_shared<McColorSink>(logger_->sinks());
-        logger_->clearSink();
-        logger_->addSink(std::move(sink));
+        logger_->clearSinks();
+        logger_->setSink("mc_color_sink", std::move(sink));
     }
     void setLevel(Level level) override
     {

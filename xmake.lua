@@ -28,7 +28,7 @@ add_requires("libdeflate v1.25")
 
 add_requires("microsoft-detours a1dd93fddfbba5ad07992edbaf4a296dcfca8d6f")
 
-add_requires("levilamina 26.51.*", {configs = {target_type = "server"}})
+add_requires("levilamina 26.60.*", {configs = {target_type = "server"}})
 add_requires("levibuildscript")
 
 set_project("endstone")
