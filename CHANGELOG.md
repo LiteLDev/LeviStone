@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 Endstone [0.11.15](https://github.com/EndstoneMC/endstone/tree/v0.11.15)
 LeviLamina >=26.60.3 <26.70.0
 
+### Added
+
+- LeviStone will create directory link `plugins` to `mods` when load
+
 ## [0.11.14] - 2026-11-05
 
 Endstone [0.11.14](https://github.com/EndstoneMC/endstone/tree/v0.11.14)
