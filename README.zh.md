@@ -11,16 +11,22 @@
 在已安装 LeviLamina 的基岩版专用服务器目录中运行：
 
 ```bash
-pip install levistone --target plugins/EndstoneRuntime
+pip install levistone --target mods/EndstoneRuntime
 ```
-LeviStone 是一个名为 `EndstoneRuntime`（即其附带的 Endstone 运行时）的 LeviLamina 模组，因此安装到该模组的目录 `plugins/EndstoneRuntime`。
+LeviStone 是一个名为 `EndstoneRuntime`（即其附带的 Endstone 运行时）的 LeviLamina 模组，因此安装到该模组的目录 `mods/EndstoneRuntime`。
 
 你也可以在 levistone 后加上 == 来安装指定版本。  
-例如，安装 0.11.13 版本：
+例如，安装 0.11.15 版本：
 ```bash
-pip install levistone==0.11.13 --target plugins/EndstoneRuntime
+pip install levistone==0.11.15 --target mods/EndstoneRuntime
 ```
 你可以在 [PyPI](https://pypi.org/project/levistone/#history) 上找到所有版本。
+
+如果你想安装早于0.11.15的版本，你需要将`mods`改成`plugins`。  
+例如，安装 0.11.14 版本：
+```bash
+pip install levistone==0.11.14 --target plugins/EndstoneRuntime
+```
 
 你正在使用Docker?试试 [docker-levistone-server](https://github.com/LiteLDev/docker-levistone-server)
 

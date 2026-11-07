@@ -11,16 +11,22 @@ A runtime for running [Endstone](https://github.com/EndstoneMC/endstone) plugins
 Run this in the folder of your Bedrock Dedicated Server with LeviLamina installed:
 
 ```bash
-pip install levistone --target plugins/EndstoneRuntime
+pip install levistone --target mods/EndstoneRuntime
 ```
-LeviStone is a LeviLamina mod named `EndstoneRuntime` (the Endstone runtime it ships), so it is installed to `plugins/EndstoneRuntime`, the folder for that mod.
+LeviStone is a LeviLamina mod named `EndstoneRuntime` (the Endstone runtime it ships), so it is installed to `mods/EndstoneRuntime`, the folder for that mod.
 
 You can also add == after levistone to install a specific version.  
-For example, to install version 0.11.13:
+For example, to install version 0.11.15:
 ```bash
-pip install levistone==0.11.13 --target plugins/EndstoneRuntime
+pip install levistone==0.11.15 --target mods/EndstoneRuntime
 ```
 You can find versions on [PyPI](https://pypi.org/project/levistone/#history).
+
+If you want to install LeviStone older than 0.11.15, you should modify the `mods` directory to `plugins`.  
+For example, to install version 0.11.14:
+```bash
+pip install levistone==0.11.14 --target plugins/EndstoneRuntime
+```
 
 Using Docker? Try [docker-levistone-server](https://github.com/LiteLDev/docker-levistone-server)
 
