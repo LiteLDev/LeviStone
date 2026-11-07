@@ -7,8 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.11.15] - 2026-11-07
+
 Endstone [0.11.15](https://github.com/EndstoneMC/endstone/tree/v0.11.15)
-LeviLamina >=26.60.3 <26.70.0
+LeviLamina >=26.60.4 <26.70.0
 
 ### Added
 
@@ -100,7 +102,8 @@ Bedrock Deidcated Server 1.21.132.3
 
 - Fixed loading on Wine
 
-[Unreleased]: https://github.com/LiteLDev/LeviStone/compare/v0.11.14...HEAD
+[Unreleased]: https://github.com/LiteLDev/LeviStone/compare/v0.11.15...HEAD
+[0.11.15]: https://github.com/LiteLDev/LeviStone/compare/v0.11.14...v0.11.15
 [0.11.14]: https://github.com/LiteLDev/LeviStone/compare/v0.11.13...v0.11.14
 [0.11.13]: https://github.com/LiteLDev/LeviStone/compare/v0.11.12...v0.11.13
 [0.11.12]: https://github.com/LiteLDev/LeviStone/compare/v0.11.11...v0.11.12
