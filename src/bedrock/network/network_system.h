@@ -66,8 +66,8 @@ public:
     [[nodiscard]] bool _isUsingNetherNetTransportLayer() const;                // Endstone: protected -> public
 
 private:
-    bool onNewIncomingConnection(const NetworkIdentifier &id, std::shared_ptr<NetworkPeer> &&peer,
-                                 std::optional<WebKey> web_key) override;  // Endstone: hook
+    ENDSTONE_HOOK bool onNewIncomingConnection(const NetworkIdentifier &id, std::shared_ptr<NetworkPeer> &&peer,
+                                               std::optional<WebKey> web_key) override;  // Endstone: hook
     void _sendInternal(const NetworkIdentifier &id, const Packet &packet, const std::string &data);
     std::unique_ptr<RemoteConnector> remote_connector_;
     std::unique_ptr<ServerLocator> server_locator_;

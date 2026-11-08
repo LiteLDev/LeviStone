@@ -131,6 +131,8 @@ target("endstone_runtime")
     remove_files("endstone/src/endstone/runtime/bedrock_hooks/dimension.cpp")
     remove_files("endstone/src/endstone/runtime/bedrock_hooks/level_chunk.cpp")
     remove_files("endstone/src/endstone/runtime/bedrock_hooks/main_chunk_source.cpp")
+    -- replaced by src/endstone/runtime/bedrock_hooks/network_system.cpp, which keeps the packet events
+    -- (EndstoneBatchedNetworkPeer) but leaves out the libdeflate compressed peer
     remove_files("endstone/src/endstone/runtime/bedrock_hooks/network_system.cpp")
     remove_files("endstone/src/endstone/runtime/bedrock_hooks/player_location_sender.cpp")
     remove_files("endstone/src/endstone/runtime/bedrock_hooks/player_tick_manager.cpp")
