@@ -16,6 +16,12 @@ LeviLamina >=26.60.4 <26.70.0
 
 - LeviStone will create directory link `plugins` to `mods` when load
 
+## [0.11.15-post.1] - 2026-11-09
+
+### Fixed
+
+- Fixed endweave not work
+
 ## [0.11.14] - 2026-11-05
 
 Endstone [0.11.14](https://github.com/EndstoneMC/endstone/tree/v0.11.14)
@@ -103,7 +109,8 @@ Bedrock Deidcated Server 1.21.132.3
 - Fixed loading on Wine
 
 [Unreleased]: https://github.com/LiteLDev/LeviStone/compare/v0.11.15...HEAD
-[0.11.15]: https://github.com/LiteLDev/LeviStone/compare/v0.11.14...v0.11.15
+[0.11.15]: https://github.com/LiteLDev/LeviStone/compare/v0.11.15-post.1...v0.11.15
+[0.11.15-post.1]: https://github.com/LiteLDev/LeviStone/compare/v0.11.14...v0.11.15-post.1
 [0.11.14]: https://github.com/LiteLDev/LeviStone/compare/v0.11.13...v0.11.14
 [0.11.13]: https://github.com/LiteLDev/LeviStone/compare/v0.11.12...v0.11.13
 [0.11.12]: https://github.com/LiteLDev/LeviStone/compare/v0.11.11...v0.11.12
