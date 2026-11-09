@@ -14,6 +14,12 @@ LeviLamina 26.51.9
 
 - Removed most of endstone's built-in optimization, because they have been ported to [LeviOptimize](https://github.com/LiteLDev/LeviOptimize)
 
+## [0.11.14-post.1] - 2026-11-09
+
+### Fixed
+
+- Fixed endweave not work
+
 ## [0.11.13] - 2026-10-07
 
 Endstone [0.11.13](https://github.com/EndstoneMC/endstone/tree/v0.11.13)
@@ -91,7 +97,8 @@ Bedrock Deidcated Server 1.21.132.3
 
 - Fixed loading on Wine
 
-[0.11.14]: https://github.com/LiteLDev/LeviStone/compare/v0.11.13...v0.11.14
+[0.11.14]: https://github.com/LiteLDev/LeviStone/compare/v0.11.14-post.1...v0.11.14
+[0.11.14-post.1]: https://github.com/LiteLDev/LeviStone/compare/v0.11.13...v0.11.14-post.1
 [0.11.13]: https://github.com/LiteLDev/LeviStone/compare/v0.11.12...v0.11.13
 [0.11.12]: https://github.com/LiteLDev/LeviStone/compare/v0.11.11...v0.11.12
 [0.11.11]: https://github.com/LiteLDev/LeviStone/compare/v0.11.10...v0.11.11
